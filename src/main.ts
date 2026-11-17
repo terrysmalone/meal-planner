@@ -7,6 +7,11 @@ type PlannedRecipe = {
   servings: number
 }
 
+type IngredientConflict = {
+  name: string
+  units: Array<{ label: string; recipeIds: string[] }>
+}
+
 type RecipeFileHandle = {
   createWritable: () => Promise<{ write: (contents: string) => Promise<void>; close: () => Promise<void> }>
 }
@@ -142,6 +147,35 @@ const recipeMatchesSearch = (recipe: Recipe, term: string) => {
   return searchableText.includes(term.trim().toLowerCase())
 }
 
+const normalizeIngredientPart = (value: string) => value.trim().toLowerCase()
+
+const findIngredientConflicts = (candidateRecipes: Recipe[], excludedRecipeId?: string): IngredientConflict[] => {
+  const ingredientsByName = new Map<
+    string,
+    { name: string; units: Map<string, { label: string; recipeIds: Set<string> }> }
+  >()
+  candidateRecipes
+    .filter((recipe) => recipe.id !== excludedRecipeId)
+    .forEach((recipe) => {
+      recipe.ingredients.forEach((ingredient) => {
+        const nameKey = normalizeIngredientPart(ingredient.name)
+        const unitKey = normalizeIngredientPart(ingredient.unit)
+        const ingredientEntry = ingredientsByName.get(nameKey) ?? { name: ingredient.name.trim(), units: new Map() }
+        const unitEntry = ingredientEntry.units.get(unitKey) ?? { label: ingredient.unit.trim(), recipeIds: new Set<string>() }
+        unitEntry.recipeIds.add(recipe.id)
+        ingredientEntry.units.set(unitKey, unitEntry)
+        ingredientsByName.set(nameKey, ingredientEntry)
+      })
+    })
+  return [...ingredientsByName.values()]
+    .filter((ingredient) => ingredient.units.size > 1)
+    .map((ingredient) => ({
+      name: ingredient.name,
+      units: [...ingredient.units.values()].map((unit) => ({ label: unit.label, recipeIds: [...unit.recipeIds] })),
+    }))
+    .sort((first, second) => first.name.localeCompare(second.name))
+}
+
 const renderRecipeCard = (recipe: Recipe) => {
   const plan = plannedRecipes.find((item) => item.recipeId === recipe.id)
   return `
@@ -254,8 +288,45 @@ const renderShoppingList = () => {
   if (!plannedRecipes.length) {
     return `<div class="empty-state"><span class="empty-icon">✦</span><h3>Your list is empty</h3><p>Add recipes to your week and your combined shopping list will appear here.</p></div>`
   }
+  const planned = plannedRecipes.map(({ recipeId }) => getRecipe(recipeId)).filter((recipe): recipe is Recipe => Boolean(recipe))
+  const conflicts = findIngredientConflicts(planned)
+  const conflictWarning = conflicts.length
+    ? `
+      <div class="shopping-warning">
+        <div class="shopping-warning-heading"><strong>Check ingredient measurements</strong><span>${conflicts.length} conflict${conflicts.length === 1 ? '' : 's'}</span></div>
+        <p>These ingredients use different units. Edit the recipes below if you want them combined into one shopping-list item.</p>
+        <ul>
+          ${conflicts
+            .map(
+              (conflict) => `
+                <li>
+                  <strong>${escapeHtml(conflict.name)}</strong>
+                  <span>${conflict.units
+                    .map(
+                      (unit) =>
+                        `${escapeHtml(unit.label || 'no unit')}: ${unit.recipeIds
+                          .map((recipeId) => getRecipe(recipeId)?.name)
+                          .filter((name): name is string => Boolean(name))
+                          .map(escapeHtml)
+                          .join(', ')}`,
+                    )
+                    .join(' · ')}</span>
+                  <div>${[...new Set(conflict.units.flatMap((unit) => unit.recipeIds))]
+                    .map(
+                      (recipeId) =>
+                        `<button type="button" class="text-button" data-edit-recipe="${escapeHtml(recipeId)}">Edit ${escapeHtml(getRecipe(recipeId)?.name ?? 'recipe')}</button>`,
+                    )
+                    .join('')}</div>
+                </li>
+              `,
+            )
+            .join('')}
+        </ul>
+      </div>
+    `
+    : ''
   const categories: Category[] = ['Produce', 'Protein', 'Dairy', 'Pantry']
-  return categories
+  return `${conflictWarning}${categories
     .filter((category) => grouped.has(category))
     .map(
       (category) => `
@@ -277,7 +348,7 @@ const renderShoppingList = () => {
         </section>
       `,
     )
-    .join('')
+    .join('')}`
 }
 
 const render = () => {
@@ -381,19 +452,19 @@ const bindEvents = () => {
     dropdown?.classList.toggle('is-open', isAccountMenuOpen)
   })
   document.querySelectorAll<HTMLElement>('[data-view-recipe]').forEach((button) => {
-      button.addEventListener('click', () => {
-        viewingRecipeId = button.dataset.viewRecipe!
-        render()
-      })
-      document.querySelectorAll<HTMLElement>('[data-edit-recipe]').forEach((button) => {
-        button.addEventListener('click', () => {
-          editingRecipeId = button.dataset.editRecipe!
-          viewingRecipeId = null
-          isRecipeFormOpen = true
-          render()
-        })
-      })
-    })
+  button.addEventListener('click', () => {
+    viewingRecipeId = button.dataset.viewRecipe!
+    render()
+  })
+  })
+  document.querySelectorAll<HTMLElement>('[data-edit-recipe]').forEach((button) => {
+  button.addEventListener('click', () => {
+    editingRecipeId = button.dataset.editRecipe!
+    viewingRecipeId = null
+    isRecipeFormOpen = true
+    render()
+  })
+  })
     document.querySelectorAll<HTMLElement>('[data-close-details]').forEach((button) => {
       button.addEventListener('click', (event) => {
         if (event.target !== button) return
@@ -436,6 +507,15 @@ const bindEvents = () => {
       ingredients: parseFormIngredients((form.elements.namedItem('ingredients') as HTMLTextAreaElement).value),
     }
     if (!recipe.name || !recipe.description || !recipe.ingredients.length) return
+    const conflicts = findIngredientConflicts([...recipes.filter((existing) => existing.id !== recipe.id), recipe]).filter((conflict) =>
+      conflict.units.some((unit) => unit.recipeIds.includes(recipe.id)),
+    )
+    if (conflicts.length) {
+      const details = conflicts
+        .map((conflict) => `${conflict.name}: ${conflict.units.map((unit) => unit.label || 'no unit').join(' / ')}`)
+        .join('\n')
+      if (!window.confirm(`This recipe uses different units for ingredients already in your recipes:\n\n${details}\n\nChoose OK to save anyway, or Cancel to return and fix the measurements.`)) return
+    }
     await saveRecipe(recipe)
     recipes = await listRecipes()
     isRecipeFormOpen = false
