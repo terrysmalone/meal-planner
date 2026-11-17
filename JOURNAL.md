@@ -83,3 +83,27 @@ Added Replace from backup importing for `recipes.json`. The importer validates t
 ## 15:58 UTC
 
 Updated Export backup to use Chrome’s File System Access API when available, allowing the user to select and overwrite `src/data/recipes.json` directly. Download fallback remains for unsupported browsers.
+
+## 16:02 UTC
+
+Moved recipe backup import and export actions into the account avatar dropdown and left the My recipes header with only the New recipe action.
+
+## 16:04 UTC
+
+Fixed account dropdown interaction by placing the header and menu above page content and making the avatar/search controls explicit non-submit buttons.
+
+## 16:07 UTC
+
+Made the account control explicit by adding a dropdown chevron and menu semantics to the TM button.
+
+## 16:08 UTC
+
+Removed the account dropdown chevron at the user’s request while keeping the TM button behavior unchanged.
+
+## 16:09 UTC
+
+Made the account dropdown persistent in the shared site header and changed it to toggle in place, ensuring backup import and export remain accessible from every page view.
+
+## 16:10 UTC
+
+Fixed the shared account and backup event listeners being nested under the My recipes New recipe setup, which prevented them from registering on Weekly plan.

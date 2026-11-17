@@ -28,6 +28,7 @@ let isRecipeFormOpen = false
 let viewingRecipeId: string | null = null
 let editingRecipeId: string | null = null
 let selectedRecipeImage: File | undefined
+let isAccountMenuOpen = false
 
 const app = document.querySelector<HTMLDivElement>('#app')!
 
@@ -299,7 +300,7 @@ const render = () => {
         <button class="${activeView === 'plan' ? 'active' : ''}" data-view="plan">Weekly plan</button>
         <button class="${activeView === 'recipes' ? 'active' : ''}" data-view="recipes">My recipes</button>
       </nav>
-      <div class="topbar-actions"><button class="icon-button" aria-label="Search">⌕</button><button class="avatar">TM</button></div>
+      <div class="topbar-actions"><button type="button" class="icon-button" aria-label="Search">⌕</button><div class="account-menu"><button type="button" class="avatar" data-account-menu aria-haspopup="menu" aria-expanded="${isAccountMenuOpen}">TM</button><div class="account-dropdown ${isAccountMenuOpen ? 'is-open' : ''}" role="menu"><div class="account-label">ACCOUNT</div><button type="button" class="dropdown-action" data-export-recipes>Export backup</button><label class="dropdown-action">Import backup<input id="recipe-backup" type="file" accept=".json,application/json"></label></div></div></div>
     </header>
     <main>
       <section class="hero">
@@ -312,7 +313,7 @@ const render = () => {
       </section>
       ${
         activeView === 'recipes'
-          ? `<section class="section-header"><div><div class="eyebrow">YOUR COLLECTION</div><h2>Recipes to cook</h2></div><div class="section-actions"><button class="text-button" data-export-recipes>Export backup</button><label class="text-button backup-import">Import backup<input id="recipe-backup" type="file" accept=".json,application/json"></label><button class="outline-button" data-new-recipe>＋ New recipe</button></div></section>
+          ? `<section class="section-header"><div><div class="eyebrow">YOUR COLLECTION</div><h2>Recipes to cook</h2></div><button class="outline-button" data-new-recipe>＋ New recipe</button></section>
              <section class="recipe-grid">${recipes.map(renderRecipeCard).join('')}</section>`
           : `<div class="content-grid">
               <section>
@@ -431,13 +432,20 @@ const bindEvents = () => {
       selectedRecipeImage = undefined
       render()
     })
-    document.querySelectorAll<HTMLElement>('[data-export-recipes]').forEach((button) => {
-      button.addEventListener('click', exportRecipeBackup)
-    })
-    document.querySelector<HTMLInputElement>('#recipe-backup')?.addEventListener('change', (event) => {
-      const file = (event.target as HTMLInputElement).files?.[0]
-      if (file) void importRecipeBackup(file)
-    })
+  })
+  document.querySelectorAll<HTMLElement>('[data-export-recipes]').forEach((button) => {
+    button.addEventListener('click', () => void exportRecipeBackup())
+  })
+  document.querySelector<HTMLInputElement>('#recipe-backup')?.addEventListener('change', (event) => {
+    const file = (event.target as HTMLInputElement).files?.[0]
+    if (file) void importRecipeBackup(file)
+  })
+  document.querySelector<HTMLButtonElement>('[data-account-menu]')?.addEventListener('click', () => {
+    isAccountMenuOpen = !isAccountMenuOpen
+    const button = document.querySelector<HTMLButtonElement>('[data-account-menu]')
+    const dropdown = document.querySelector<HTMLDivElement>('.account-dropdown')
+    button?.setAttribute('aria-expanded', String(isAccountMenuOpen))
+    dropdown?.classList.toggle('is-open', isAccountMenuOpen)
   })
   document.querySelectorAll<HTMLElement>('[data-view-recipe]').forEach((button) => {
       button.addEventListener('click', () => {

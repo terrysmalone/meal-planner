@@ -4,7 +4,7 @@
 * { box-sizing: border-box; }
 body { margin: 0; }
 button { font: inherit; cursor: pointer; }
-.topbar { height: 82px; background: #fff; border-bottom: 1px solid #e6e9e1; display: flex; align-items: center; padding: 0 max(28px, calc((100vw - 1200px) / 2)); gap: 80px; }
+.topbar { position: relative; z-index: 20; height: 82px; background: #fff; border-bottom: 1px solid #e6e9e1; display: flex; align-items: center; padding: 0 max(28px, calc((100vw - 1200px) / 2)); gap: 80px; }
 .brand { color: #23332d; text-decoration: none; font-weight: 700; font-size: 18px; letter-spacing: -.4px; display: flex; gap: 9px; align-items: center; white-space: nowrap; }
 .brand em { color: #9da69f; font-family: 'Playfair Display', serif; font-weight: 400; }
 .brand-mark { width: 28px; height: 28px; display: grid; place-items: center; background: #dce8d4; color: #668d61; border-radius: 50%; font-size: 15px; }
@@ -13,6 +13,13 @@ nav button { background: none; border: 0; color: #929a94; font-size: 13px; font-
 nav button.active { color: #23332d; }
 nav button.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; border-radius: 3px 3px 0 0; background: #7ba574; }
 .topbar-actions { margin-left: auto; display: flex; align-items: center; gap: 18px; }
+.account-menu { position: relative; z-index: 21; }
+.account-dropdown { display: none; position: absolute; top: 44px; right: 0; z-index: 5; min-width: 170px; padding: 8px; background: #fff; border: 1px solid #e6ebe3; border-radius: 6px; box-shadow: 0 10px 24px #23332d18; }
+.account-dropdown.is-open { display: block; }
+.account-label { padding: 7px 9px 5px; color: #a2aaa3; font-size: 9px; font-weight: 700; letter-spacing: 1.4px; }
+.dropdown-action { display: block; width: 100%; padding: 9px; border: 0; border-radius: 4px; background: transparent; color: #56645b; text-align: left; font: inherit; font-size: 12px; cursor: pointer; }
+.dropdown-action:hover { background: #f1f6ef; color: #547a4f; }
+.dropdown-action input { display: none; }
 .icon-button { border: 0; background: none; color: #69756e; font-size: 24px; }
 .avatar { border: 0; background: #dce8d4; color: #52714c; width: 34px; height: 34px; border-radius: 50%; font-size: 11px; font-weight: 700; }
 main { max-width: 1200px; margin: auto; padding: 66px 28px 80px; }
@@ -27,9 +34,6 @@ h1 i { color: #799b75; font-family: 'Playfair Display', serif; font-weight: 600;
 .week-summary small { color: #94a097; font-size: 13px; font-weight: 500; }
 .content-grid { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 52px; }
 .section-header, .panel-header { display: flex; justify-content: space-between; align-items: end; margin-bottom: 22px; }
-.section-actions { display: flex; align-items: center; gap: 18px; }
-.backup-import { cursor: pointer; }
-.backup-import input { display: none; }
 h2 { color: #2d4336; font-size: 26px; letter-spacing: -1px; margin-top: 8px; }
 .text-button, .outline-button { color: #71946f; background: none; border: 0; font-size: 12px; font-weight: 700; }
 .outline-button { border: 1px solid #b5c6b0; border-radius: 5px; padding: 10px 15px; }
