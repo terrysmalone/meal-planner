@@ -195,3 +195,23 @@ Added shopping-list validation for ingredients that share a name but use differe
 ## 17:01 UTC
 
 Rounded all fractional quantities for unitless ingredients up to whole numbers, including onions, potatoes, garlic, leeks, lemons, carrots, and chillies. Measured quantities were left unchanged, and an IndexedDB migration updates existing recipes.
+
+## 17:03 UTC
+
+Added a concise print layout for the shopping list. Printing now hides app navigation, recipe cards, warnings, explanatory text, and checkbox controls while presenting the shopping list full-page by category.
+
+## 17:04 UTC
+
+Compressed the shopping-list print layout further with landscape A4 output, three columns, smaller text, and tighter spacing to reduce page count.
+
+## 17:05 UTC
+
+Changed the compact shopping-list print layout to portrait A4 with two columns, smaller typography, tighter margins, and truncated long ingredient names where necessary.
+
+## 17:06 UTC
+
+Added a print-only brief list of the selected meals above the concise shopping list for reference.
+
+## 17:06 UTC
+
+Removed the “STEP 2” and “Shopping list” heading from printed output while retaining the heading in the normal app view.

@@ -389,6 +389,11 @@ const render = () => {
               </section>
               <aside class="shopping-panel">
                 <div class="panel-header"><div><div class="eyebrow">STEP 2</div><h2>Shopping list</h2></div><button class="print-button" onclick="window.print()">Print</button></div>
+                <div class="print-meals"><strong>Meals</strong><ul>${plannedRecipes
+                  .map(({ recipeId }) => getRecipe(recipeId)?.name)
+                  .filter((name): name is string => Boolean(name))
+                  .map((name) => `<li>${escapeHtml(name)}</li>`)
+                  .join('')}</ul></div>
                 <p class="panel-intro">Ingredients combined from your weekly plan.</p>
                 ${renderShoppingList()}
               </aside>
