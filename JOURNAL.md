@@ -67,3 +67,7 @@ Added the Chorizo, Tomato & Tenderstem Spaghetti recipe from the supplied card, 
 ## 15:47 UTC
 
 Changed the weekly-plan heading from a hardcoded date range to a dynamic range for the next Monday through Sunday.
+
+## 15:49 UTC
+
+Added recipe editing with prefilled fields, edit actions on recipe cards and recipe details, and IndexedDB updates that preserve existing recipe IDs and weekly-plan references.

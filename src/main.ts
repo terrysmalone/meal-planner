@@ -15,6 +15,7 @@ let plannedRecipes: PlannedRecipe[] = savedPlan ? JSON.parse(savedPlan) : []
 let activeView: 'plan' | 'recipes' = 'plan'
 let isRecipeFormOpen = false
 let viewingRecipeId: string | null = null
+let editingRecipeId: string | null = null
 let selectedRecipeImage: File | undefined
 
 const app = document.querySelector<HTMLDivElement>('#app')!
@@ -68,6 +69,7 @@ const renderRecipeCard = (recipe: Recipe) => {
       </div>
       <div class="recipe-card-actions">
         <button class="text-button" data-view-recipe="${escapeHtml(recipe.id)}">View recipe</button>
+        <button class="text-button" data-edit-recipe="${escapeHtml(recipe.id)}">Edit</button>
         <button class="delete-button" data-delete-recipe="${escapeHtml(recipe.id)}">Delete</button>
       </div>
     </article>
@@ -114,28 +116,28 @@ const parseFormIngredients = (value: string): Ingredient[] =>
     })
     .filter((ingredient) => ingredient.name && Number.isFinite(ingredient.quantity))
 
-const recipeForm = () => `
+const recipeForm = (recipe?: Recipe) => `
   <div class="modal-backdrop" data-close-modal>
     <section class="recipe-modal" role="dialog" aria-modal="true" aria-labelledby="recipe-modal-title">
       <div class="modal-header">
-        <div><div class="eyebrow">RECIPE CARD IMPORT</div><h2 id="recipe-modal-title">Add a recipe</h2></div>
+        <div><div class="eyebrow">RECIPE CARD IMPORT</div><h2 id="recipe-modal-title">${recipe ? 'Edit recipe' : 'Add a recipe'}</h2></div>
         <button class="icon-button" type="button" aria-label="Close" data-close-modal>×</button>
       </div>
-      <p class="modal-intro">Upload a recipe card to extract its text, then review the fields before saving.</p>
+      <p class="modal-intro">${recipe ? 'Update the recipe details below.' : 'Upload a recipe card to extract its text, then review the fields before saving.'}</p>
       <form id="recipe-form">
-        <div class="upload-row"><label class="upload-field">Recipe card image<input id="recipe-image" type="file" accept="image/*"></label><button type="button" class="outline-button" data-run-ocr disabled>Read card</button></div>
+        ${recipe ? '' : '<div class="upload-row"><label class="upload-field">Recipe card image<input id="recipe-image" type="file" accept="image/*"></label><button type="button" class="outline-button" data-run-ocr disabled>Read card</button></div>'}
         <p id="ocr-status" class="form-status" aria-live="polite">Choose an image, then select “Read card”.</p>
         <div class="form-grid">
-          <label>Name<input name="name" required></label>
-          <label>Description<input name="description" required></label>
-          <label>Minutes<input name="time" type="number" min="1" value="30" required></label>
-          <label>Servings<input name="servings" type="number" min="1" value="2" required></label>
-          <label>Tags<input name="tags" placeholder="Quick, Vegetarian"></label>
+          <label>Name<input name="name" value="${escapeHtml(recipe?.name ?? '')}" required></label>
+          <label>Description<input name="description" value="${escapeHtml(recipe?.description ?? '')}" required></label>
+          <label>Minutes<input name="time" type="number" min="1" value="${recipe?.time ?? 30}" required></label>
+          <label>Servings<input name="servings" type="number" min="1" value="${recipe?.servings ?? 2}" required></label>
+          <label>Tags<input name="tags" value="${escapeHtml(recipe?.tags.join(', ') ?? '')}" placeholder="Quick, Vegetarian"></label>
         </div>
         <label>Ingredients <span class="field-help">quantity | unit | name | category</span>
-          <textarea name="ingredients" rows="8" required placeholder="160 | g | Blanched peas | Produce"></textarea>
+          <textarea name="ingredients" rows="8" required placeholder="160 | g | Blanched peas | Produce">${recipe?.ingredients.map((item) => `${item.quantity} | ${item.unit} | ${item.name} | ${item.category}`).join('\n') ?? ''}</textarea>
         </label>
-        <div class="modal-actions"><button type="button" class="text-button" data-close-modal>Cancel</button><button type="submit" class="outline-button">Save recipe</button></div>
+        <div class="modal-actions"><button type="button" class="text-button" data-close-modal>Cancel</button><button type="submit" class="outline-button">${recipe ? 'Save changes' : 'Save recipe'}</button></div>
       </form>
     </section>
   </div>
@@ -154,6 +156,7 @@ const recipeDetails = (recipe: Recipe) => `
       <ul class="ingredient-list">
         ${recipe.ingredients.map((ingredient) => `<li><span>${formatQuantity(ingredient.quantity)} ${escapeHtml(ingredient.unit)} ${escapeHtml(ingredient.name)}</span><strong>${escapeHtml(ingredient.category)}</strong></li>`).join('')}
       </ul>
+      <div class="modal-actions"><button type="button" class="text-button" data-edit-recipe="${escapeHtml(recipe.id)}">Edit recipe</button></div>
     </section>
   </div>
 `
@@ -243,7 +246,7 @@ const render = () => {
       }
     </main>
     <footer><span>Operation Fish for Life</span><span>Everything saved locally on this device</span></footer>
-    ${isRecipeFormOpen ? recipeForm() : ''}
+    ${isRecipeFormOpen ? recipeForm(editingRecipeId ? getRecipe(editingRecipeId) : undefined) : ''}
     ${viewingRecipeId ? recipeDetails(getRecipe(viewingRecipeId)!) : ''}
   `
   bindEvents()
@@ -342,6 +345,7 @@ const bindEvents = () => {
   document.querySelectorAll<HTMLElement>('[data-new-recipe]').forEach((button) => {
     button.addEventListener('click', () => {
       isRecipeFormOpen = true
+      editingRecipeId = null
       selectedRecipeImage = undefined
       render()
     })
@@ -350,6 +354,15 @@ const bindEvents = () => {
       button.addEventListener('click', () => {
         viewingRecipeId = button.dataset.viewRecipe!
         render()
+      })
+      document.querySelectorAll<HTMLElement>('[data-edit-recipe]').forEach((button) => {
+        button.addEventListener('click', () => {
+          editingRecipeId = button.dataset.editRecipe!
+          viewingRecipeId = null
+          isRecipeFormOpen = true
+          selectedRecipeImage = undefined
+          render()
+        })
       })
     })
     document.querySelectorAll<HTMLElement>('[data-close-details]').forEach((button) => {
@@ -376,6 +389,7 @@ const bindEvents = () => {
     button.addEventListener('click', (event) => {
       if (event.target !== button) return
       isRecipeFormOpen = false
+      editingRecipeId = null
       render()
     })
   })
@@ -394,7 +408,7 @@ const bindEvents = () => {
     const form = event.currentTarget as HTMLFormElement
     const field = (name: string) => form.elements.namedItem(name) as HTMLInputElement
     const recipe: Recipe = {
-      id: `recipe-${crypto.randomUUID()}`,
+      id: editingRecipeId ?? `recipe-${crypto.randomUUID()}`,
       name: field('name').value.trim(),
       description: field('description').value.trim(),
       time: Number(field('time').value),
@@ -406,6 +420,7 @@ const bindEvents = () => {
     await saveRecipe(recipe)
     recipes = await listRecipes()
     isRecipeFormOpen = false
+    editingRecipeId = null
     render()
   })
 }
