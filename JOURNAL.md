@@ -127,3 +127,15 @@ Preserved the existing mobile footer spacing while finalizing the responsive sea
 ## 16:30 UTC
 
 Changed Weekly plan to show only recipes selected for the week. Added an empty state directing users to My recipes when no meals are chosen; the shopping list was already selection-based.
+
+## 16:33 UTC
+
+Increased current recipe ingredient quantities by 50% while keeping serving labels unchanged. Updated the repository backup and added an IndexedDB migration to apply the larger portions to existing recipes.
+
+## 16:34 UTC
+
+Adjusted database initialization to insert each missing starter recipe individually, preventing the portion migration from omitting a recipe on a fresh install.
+
+## 16:35 UTC
+
+Added an explicit IndexedDB store guard in the portion migration after the type-check identified the upgrade transaction as potentially unavailable.

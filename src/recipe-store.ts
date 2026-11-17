@@ -18,7 +18,7 @@ export type Recipe = {
 }
 
 const databaseName = 'operation-fish-for-life'
-const databaseVersion = 3
+const databaseVersion = 4
 const recipeStoreName = 'recipes'
 
 const chickenFajitaTrayBake: Recipe = {
@@ -29,17 +29,17 @@ const chickenFajitaTrayBake: Recipe = {
   servings: 2,
   tags: ['Gluten-free', 'One pot'],
   ingredients: [
-    { name: 'Cheddar cheese', quantity: 40, unit: 'g', category: 'Dairy' },
-    { name: 'Chicken breast strips', quantity: 250, unit: 'g', category: 'Protein' },
-    { name: 'Dried chilli flakes', quantity: 0.5, unit: 'tsp', category: 'Pantry' },
-    { name: 'Dried oregano', quantity: 1, unit: 'tsp', category: 'Pantry' },
-    { name: 'Garlic clove', quantity: 1, unit: '', category: 'Produce' },
-    { name: 'Ground cumin', quantity: 1, unit: 'tsp', category: 'Pantry' },
-    { name: 'Ground smoked paprika', quantity: 1, unit: 'tsp', category: 'Pantry' },
-    { name: 'Mayonnaise', quantity: 25, unit: 'ml', category: 'Pantry' },
-    { name: 'Red onion', quantity: 1, unit: '', category: 'Produce' },
-    { name: 'Red pepper', quantity: 1, unit: '', category: 'Produce' },
-    { name: 'White potato', quantity: 4, unit: '', category: 'Produce' },
+    { name: 'Cheddar cheese', quantity: 60, unit: 'g', category: 'Dairy' },
+    { name: 'Chicken breast strips', quantity: 375, unit: 'g', category: 'Protein' },
+    { name: 'Dried chilli flakes', quantity: 0.75, unit: 'tsp', category: 'Pantry' },
+    { name: 'Dried oregano', quantity: 1.5, unit: 'tsp', category: 'Pantry' },
+    { name: 'Garlic clove', quantity: 2, unit: '', category: 'Produce' },
+    { name: 'Ground cumin', quantity: 1.5, unit: 'tsp', category: 'Pantry' },
+    { name: 'Ground smoked paprika', quantity: 1.5, unit: 'tsp', category: 'Pantry' },
+    { name: 'Mayonnaise', quantity: 37.5, unit: 'ml', category: 'Pantry' },
+    { name: 'Red onion', quantity: 2, unit: '', category: 'Produce' },
+    { name: 'Red pepper', quantity: 2, unit: '', category: 'Produce' },
+    { name: 'White potato', quantity: 6, unit: '', category: 'Produce' },
   ],
 }
 
@@ -51,14 +51,14 @@ const chorizoSpaghetti: Recipe = {
   servings: 2,
   tags: ['10-minute meal'],
   ingredients: [
-    { name: 'Cherry tomatoes', quantity: 125, unit: 'g', category: 'Produce' },
-    { name: 'Diced chorizo', quantity: 100, unit: 'g', category: 'Protein' },
-    { name: 'Grated Italian hard cheese', quantity: 30, unit: 'g', category: 'Dairy' },
-    { name: 'Roasted garlic paste', quantity: 15, unit: 'g', category: 'Pantry' },
-    { name: 'Soft cheese', quantity: 50, unit: 'g', category: 'Dairy' },
-    { name: 'Spaghetti', quantity: 190, unit: 'g', category: 'Pantry' },
-    { name: 'Tenderstem broccoli', quantity: 80, unit: 'g', category: 'Produce' },
-    { name: 'Tomato paste', quantity: 16, unit: 'g', category: 'Pantry' },
+    { name: 'Cherry tomatoes', quantity: 190, unit: 'g', category: 'Produce' },
+    { name: 'Diced chorizo', quantity: 150, unit: 'g', category: 'Protein' },
+    { name: 'Grated Italian hard cheese', quantity: 45, unit: 'g', category: 'Dairy' },
+    { name: 'Roasted garlic paste', quantity: 22.5, unit: 'g', category: 'Pantry' },
+    { name: 'Soft cheese', quantity: 75, unit: 'g', category: 'Dairy' },
+    { name: 'Spaghetti', quantity: 285, unit: 'g', category: 'Pantry' },
+    { name: 'Tenderstem broccoli', quantity: 120, unit: 'g', category: 'Produce' },
+    { name: 'Tomato paste', quantity: 24, unit: 'g', category: 'Pantry' },
   ],
 }
 
@@ -71,14 +71,14 @@ export const starterRecipes: Recipe[] = [
     servings: 2,
     tags: ['Vegetarian', 'Quick'],
     ingredients: [
-      { name: 'Blanched peas', quantity: 160, unit: 'g', category: 'Produce' },
-      { name: 'Cooked white long grain rice', quantity: 280, unit: 'g', category: 'Pantry' },
-      { name: 'Garlic clove', quantity: 1, unit: '', category: 'Produce' },
-      { name: 'Halloumi', quantity: 200, unit: 'g', category: 'Dairy' },
-      { name: 'Mayonnaise', quantity: 50, unit: 'ml', category: 'Pantry' },
-      { name: 'Peri peri spice mix', quantity: 1, unit: 'tbsp', category: 'Pantry' },
-      { name: 'Red pepper', quantity: 1, unit: '', category: 'Produce' },
-      { name: 'Sriracha or chilli sauce', quantity: 8, unit: 'ml', category: 'Pantry' },
+      { name: 'Blanched peas', quantity: 240, unit: 'g', category: 'Produce' },
+      { name: 'Cooked white long grain rice', quantity: 420, unit: 'g', category: 'Pantry' },
+      { name: 'Garlic clove', quantity: 2, unit: '', category: 'Produce' },
+      { name: 'Halloumi', quantity: 300, unit: 'g', category: 'Dairy' },
+      { name: 'Mayonnaise', quantity: 75, unit: 'ml', category: 'Pantry' },
+      { name: 'Peri peri spice mix', quantity: 1.5, unit: 'tbsp', category: 'Pantry' },
+      { name: 'Red pepper', quantity: 2, unit: '', category: 'Produce' },
+      { name: 'Sriracha or chilli sauce', quantity: 12, unit: 'ml', category: 'Pantry' },
     ],
   },
   chickenFajitaTrayBake,
@@ -98,6 +98,23 @@ const openDatabase = () => {
       if (event.oldVersion < 1) database.createObjectStore(recipeStoreName, { keyPath: 'id' })
       if (event.oldVersion < 2) request.transaction?.objectStore(recipeStoreName).put(chickenFajitaTrayBake)
       if (event.oldVersion < 3) request.transaction?.objectStore(recipeStoreName).put(chorizoSpaghetti)
+      if (event.oldVersion < 4) {
+        const store = request.transaction?.objectStore(recipeStoreName)
+        const recipesRequest = store?.getAll()
+        recipesRequest?.addEventListener('success', () => {
+          if (store) {
+            recipesRequest.result.forEach((recipe: Recipe) => {
+              store.put({
+                ...recipe,
+                ingredients: recipe.ingredients.map((ingredient) => ({
+                  ...ingredient,
+                  quantity: ingredient.unit ? Math.round(ingredient.quantity * 1.5 * 100) / 100 : Math.round(ingredient.quantity * 1.5),
+                })),
+              })
+            })
+          }
+        })
+      }
     }
   })
   return databasePromise
@@ -153,8 +170,9 @@ export const initializeRecipes = async () => {
   const transaction = database.transaction(recipeStoreName, 'readwrite')
   const store = transaction.objectStore(recipeStoreName)
   ;['lemon-chicken', 'tomato-pasta', 'chickpea-curry', 'salmon-bowl'].forEach((id) => store.delete(id))
-  const count = await requestResult(store.count())
-  if (count === 0) starterRecipes.forEach((recipe) => store.put(recipe))
+  const existingRecipes = await requestResult(store.getAll())
+  const existingIds = new Set(existingRecipes.map((recipe) => recipe.id))
+  starterRecipes.filter((recipe) => !existingIds.has(recipe.id)).forEach((recipe) => store.put(recipe))
   await new Promise<void>((resolve, reject) => {
     transaction.onerror = () => reject(transaction.error ?? new Error('Unable to initialize the recipe database.'))
     transaction.oncomplete = () => resolve()
