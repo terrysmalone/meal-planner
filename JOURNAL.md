@@ -107,3 +107,7 @@ Made the account dropdown persistent in the shared site header and changed it to
 ## 16:10 UTC
 
 Fixed the shared account and backup event listeners being nested under the My recipes New recipe setup, which prevented them from registering on Weekly plan.
+
+## 16:20 UTC
+
+Removed the broken global search button from the site header in preparation for targeted search controls.

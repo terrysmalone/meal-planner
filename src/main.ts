@@ -300,7 +300,7 @@ const render = () => {
         <button class="${activeView === 'plan' ? 'active' : ''}" data-view="plan">Weekly plan</button>
         <button class="${activeView === 'recipes' ? 'active' : ''}" data-view="recipes">My recipes</button>
       </nav>
-      <div class="topbar-actions"><button type="button" class="icon-button" aria-label="Search">⌕</button><div class="account-menu"><button type="button" class="avatar" data-account-menu aria-haspopup="menu" aria-expanded="${isAccountMenuOpen}">TM</button><div class="account-dropdown ${isAccountMenuOpen ? 'is-open' : ''}" role="menu"><div class="account-label">ACCOUNT</div><button type="button" class="dropdown-action" data-export-recipes>Export backup</button><label class="dropdown-action">Import backup<input id="recipe-backup" type="file" accept=".json,application/json"></label></div></div></div>
+      <div class="topbar-actions"><div class="account-menu"><button type="button" class="avatar" data-account-menu aria-haspopup="menu" aria-expanded="${isAccountMenuOpen}">TM</button><div class="account-dropdown ${isAccountMenuOpen ? 'is-open' : ''}" role="menu"><div class="account-label">ACCOUNT</div><button type="button" class="dropdown-action" data-export-recipes>Export backup</button><label class="dropdown-action">Import backup<input id="recipe-backup" type="file" accept=".json,application/json"></label></div></div></div>
     </header>
     <main>
       <section class="hero">
