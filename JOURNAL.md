@@ -115,3 +115,11 @@ Removed the broken global search button from the site header in preparation for 
 ## 16:22 UTC
 
 Removed the recipe-card file picker, OCR workflow, image preprocessing, and Tesseract dependency. New recipes are now entered manually through the recipe form.
+
+## 16:28 UTC
+
+Added live My recipes search filtering across names, descriptions, tags, ingredients, units, and categories, with a responsive search field and no-results state.
+
+## 16:29 UTC
+
+Preserved the existing mobile footer spacing while finalizing the responsive search layout.

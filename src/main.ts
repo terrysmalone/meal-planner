@@ -27,6 +27,7 @@ let isRecipeFormOpen = false
 let viewingRecipeId: string | null = null
 let editingRecipeId: string | null = null
 let isAccountMenuOpen = false
+let recipeSearchTerm = ''
 
 const app = document.querySelector<HTMLDivElement>('#app')!
 
@@ -128,6 +129,18 @@ const escapeHtml = (value: string) =>
   )
 
 const getRecipe = (id: string) => recipes.find((recipe) => recipe.id === id)
+
+const recipeMatchesSearch = (recipe: Recipe, term: string) => {
+  const searchableText = [
+    recipe.name,
+    recipe.description,
+    ...recipe.tags,
+    ...recipe.ingredients.flatMap((ingredient) => [ingredient.name, ingredient.unit, ingredient.category]),
+  ]
+    .join(' ')
+    .toLowerCase()
+  return searchableText.includes(term.trim().toLowerCase())
+}
 
 const renderRecipeCard = (recipe: Recipe) => {
   const plan = plannedRecipes.find((item) => item.recipeId === recipe.id)
@@ -288,8 +301,11 @@ const render = () => {
       </section>
       ${
         activeView === 'recipes'
-          ? `<section class="section-header"><div><div class="eyebrow">YOUR COLLECTION</div><h2>Recipes to cook</h2></div><button class="outline-button" data-new-recipe>＋ New recipe</button></section>
-             <section class="recipe-grid">${recipes.map(renderRecipeCard).join('')}</section>`
+          ? (() => {
+              const filteredRecipes = recipes.filter((recipe) => recipeMatchesSearch(recipe, recipeSearchTerm))
+              return `<section class="section-header"><div><div class="eyebrow">YOUR COLLECTION</div><h2>Recipes to cook</h2></div><div class="recipe-actions"><input class="recipe-search" id="recipe-search" type="search" value="${escapeHtml(recipeSearchTerm)}" placeholder="Search recipes"><button class="outline-button" data-new-recipe>＋ New recipe</button></div></section>
+             ${filteredRecipes.length ? `<section class="recipe-grid">${filteredRecipes.map(renderRecipeCard).join('')}</section>` : '<div class="empty-state recipe-no-results"><span class="empty-icon">⌕</span><h3>No recipes found</h3><p>Try a different name, ingredient, tag, or category.</p></div>'}`
+            })()
           : `<div class="content-grid">
               <section>
                 <div class="section-header"><div><div class="eyebrow">STEP 1</div><h2>Pick your meals</h2></div><button class="text-button" data-view="recipes">See all recipes →</button></div>
@@ -335,6 +351,14 @@ const bindEvents = () => {
       isRecipeFormOpen = true
       editingRecipeId = null
       render()
+    })
+    document.querySelector<HTMLInputElement>('#recipe-search')?.addEventListener('input', (event) => {
+      recipeSearchTerm = (event.target as HTMLInputElement).value
+      const cursorPosition = recipeSearchTerm.length
+      render()
+      const searchInput = document.querySelector<HTMLInputElement>('#recipe-search')
+      searchInput?.focus()
+      searchInput?.setSelectionRange(cursorPosition, cursorPosition)
     })
   })
   document.querySelectorAll<HTMLElement>('[data-export-recipes]').forEach((button) => {
