@@ -239,7 +239,7 @@ const aggregateIngredients = () => {
     if (!recipe) return
     recipe.ingredients.forEach((ingredient) => {
       const category = grouped.get(ingredient.category) ?? new Map()
-      const key = `${ingredient.name.toLowerCase()}|${ingredient.unit}`
+      const key = JSON.stringify([ingredient.name.trim().toLowerCase(), ingredient.unit.trim().toLowerCase()])
       const current = category.get(key)
       const scaled = ingredient.quantity * (servings / recipe.servings)
       category.set(key, { name: ingredient.name, quantity: (current?.quantity ?? 0) + scaled, unit: ingredient.unit })
@@ -262,6 +262,7 @@ const renderShoppingList = () => {
         <section class="shopping-group">
           <div class="shopping-heading"><h3>${category}</h3><span>${grouped.get(category)!.size} items</span></div>
           ${[...grouped.get(category)!.values()]
+            .sort((first, second) => first.name.localeCompare(second.name))
             .map(
               (item) => `
                 <label class="shopping-item">

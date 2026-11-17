@@ -179,3 +179,11 @@ Added the Cheesy Black Bean Enchiladas recipe from the supplied card with ingred
 ## 16:50 UTC
 
 Added the Truffle Cacio E Pepe Sauce With Spinach & Ricotta Ravioli recipe from the supplied card with ingredient quantities increased by 50%. Added it to the repository backup and IndexedDB schema migration.
+
+## 16:53 UTC
+
+Fixed shopping-list ingredient grouping so the ingredient name and measurement unit are treated as a composite key. Distinct units such as `can` and `cans` now remain separate shopping-list entries, while casing and surrounding whitespace are normalized.
+
+## 16:55 UTC
+
+Alphabetised ingredients within each shopping-list category.
