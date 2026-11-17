@@ -31,3 +31,39 @@ Added an IndexedDB recipe database with the existing recipes plus the pictured P
 ## 15:28 UTC
 
 Removed the four original sample recipes, leaving only the Peri Peri Fried Rice recipe as starter data. Existing IndexedDB users are cleaned up automatically, along with stale weekly-plan references.
+
+## 15:30 UTC
+
+Added full-recipe viewing and deletion controls to the My recipes page. Recipe details now show ingredients and metadata, while deletion removes the recipe from IndexedDB and the weekly plan.
+
+## 15:31 UTC
+
+Fixed recipe-card event binding so the full-recipe view and delete controls also work from the weekly plan section.
+
+## 15:33 UTC
+
+Hardened recipe-card image import after the browser became unresponsive: selecting an image no longer starts OCR automatically, OCR is explicitly started with a Read card button, and images are resized before processing to reduce browser memory and CPU usage.
+
+## 15:37 UTC
+
+Fixed the recipe import modal closing when its file input was clicked. Backdrop handlers now close only when the backdrop or an explicit close button is the event target, allowing image selection and form interaction to remain open.
+
+## 15:38 UTC
+
+Improved recipe-card OCR by upscaling images, applying grayscale and contrast enhancement, enabling automatic rotation, and configuring Tesseract for multi-column text with preserved spacing.
+
+## 15:39 UTC
+
+Adjusted the Tesseract page-segmentation setting to use its typed automatic-layout enum after the initial build caught a type mismatch.
+
+## 15:41 UTC
+
+Added the One Tray Loaded Chicken & Fries Fajita Tray Bake recipe with its card details and ingredients. Bumped the IndexedDB schema so existing installations receive it automatically.
+
+## 15:46 UTC
+
+Added the Chorizo, Tomato & Tenderstem Spaghetti recipe from the supplied card, including its 2-person ingredient quantities and 10-minute-meal tag. Bumped the IndexedDB schema so existing installations receive it automatically.
+
+## 15:47 UTC
+
+Changed the weekly-plan heading from a hardcoded date range to a dynamic range for the next Monday through Sunday.

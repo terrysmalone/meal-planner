@@ -1,6 +1,6 @@
-import { createWorker } from 'tesseract.js'
+import { createWorker, PSM } from 'tesseract.js'
 import './style.css'
-import { initializeRecipes, listRecipes, saveRecipe } from './recipe-store'
+import { deleteRecipe, initializeRecipes, listRecipes, saveRecipe } from './recipe-store'
 import type { Category, Ingredient, Recipe } from './recipe-store'
 
 type PlannedRecipe = {
@@ -14,6 +14,8 @@ let recipes: Recipe[] = []
 let plannedRecipes: PlannedRecipe[] = savedPlan ? JSON.parse(savedPlan) : []
 let activeView: 'plan' | 'recipes' = 'plan'
 let isRecipeFormOpen = false
+let viewingRecipeId: string | null = null
+let selectedRecipeImage: File | undefined
 
 const app = document.querySelector<HTMLDivElement>('#app')!
 
@@ -21,6 +23,21 @@ const savePlan = () => localStorage.setItem(storageKey, JSON.stringify(plannedRe
 
 const formatQuantity = (quantity: number) =>
   Number.isInteger(quantity) ? String(quantity) : quantity.toFixed(1).replace('.0', '')
+
+const nextWeekLabel = () => {
+  const today = new Date()
+  const daysUntilNextMonday = ((8 - today.getDay()) % 7) || 7
+  const monday = new Date(today)
+  monday.setDate(today.getDate() + daysUntilNextMonday)
+  const sunday = new Date(monday)
+  sunday.setDate(monday.getDate() + 6)
+  const monthFormatter = new Intl.DateTimeFormat('en-US', { month: 'long' })
+  const startMonth = monthFormatter.format(monday)
+  const endMonth = monthFormatter.format(sunday)
+  return startMonth === endMonth
+    ? `${startMonth} ${monday.getDate()}–${sunday.getDate()}`
+    : `${startMonth} ${monday.getDate()}–${endMonth} ${sunday.getDate()}`
+}
 
 const escapeHtml = (value: string) =>
   value.replace(
@@ -48,6 +65,10 @@ const renderRecipeCard = (recipe: Recipe) => {
       <div class="recipe-meta">
         <span>◷ ${recipe.time} min</span>
         <span>♧ ${recipe.servings} servings</span>
+      </div>
+      <div class="recipe-card-actions">
+        <button class="text-button" data-view-recipe="${escapeHtml(recipe.id)}">View recipe</button>
+        <button class="delete-button" data-delete-recipe="${escapeHtml(recipe.id)}">Delete</button>
       </div>
     </article>
   `
@@ -102,8 +123,8 @@ const recipeForm = () => `
       </div>
       <p class="modal-intro">Upload a recipe card to extract its text, then review the fields before saving.</p>
       <form id="recipe-form">
-        <label class="upload-field">Recipe card image<input id="recipe-image" type="file" accept="image/*"></label>
-        <p id="ocr-status" class="form-status" aria-live="polite"></p>
+        <div class="upload-row"><label class="upload-field">Recipe card image<input id="recipe-image" type="file" accept="image/*"></label><button type="button" class="outline-button" data-run-ocr disabled>Read card</button></div>
+        <p id="ocr-status" class="form-status" aria-live="polite">Choose an image, then select “Read card”.</p>
         <div class="form-grid">
           <label>Name<input name="name" required></label>
           <label>Description<input name="description" required></label>
@@ -116,6 +137,23 @@ const recipeForm = () => `
         </label>
         <div class="modal-actions"><button type="button" class="text-button" data-close-modal>Cancel</button><button type="submit" class="outline-button">Save recipe</button></div>
       </form>
+    </section>
+  </div>
+`
+
+const recipeDetails = (recipe: Recipe) => `
+  <div class="modal-backdrop" data-close-details>
+    <section class="recipe-modal recipe-details" role="dialog" aria-modal="true" aria-labelledby="recipe-details-title">
+      <div class="modal-header">
+        <div><div class="eyebrow">${escapeHtml(recipe.tags.join(' · '))}</div><h2 id="recipe-details-title">${escapeHtml(recipe.name)}</h2></div>
+        <button class="icon-button" type="button" aria-label="Close" data-close-details>×</button>
+      </div>
+      <p class="modal-intro">${escapeHtml(recipe.description)}</p>
+      <div class="recipe-detail-meta"><span>◷ ${recipe.time} min</span><span>♧ ${recipe.servings} servings</span></div>
+      <h3>Ingredients</h3>
+      <ul class="ingredient-list">
+        ${recipe.ingredients.map((ingredient) => `<li><span>${formatQuantity(ingredient.quantity)} ${escapeHtml(ingredient.unit)} ${escapeHtml(ingredient.name)}</span><strong>${escapeHtml(ingredient.category)}</strong></li>`).join('')}
+      </ul>
     </section>
   </div>
 `
@@ -181,7 +219,7 @@ const render = () => {
     <main>
       <section class="hero">
         <div>
-          <div class="eyebrow">WEEK OF OCTOBER 14–20</div>
+          <div class="eyebrow">WEEK OF ${nextWeekLabel().toUpperCase()}</div>
           <h1>Give someone a fish and they'll eat for a day.<br><i>Teach them how to fish and they'll eat for life.</i></h1>
           <p>Choose your meals for the week and we’ll take care of the shopping list.</p>
         </div>
@@ -206,6 +244,7 @@ const render = () => {
     </main>
     <footer><span>Operation Fish for Life</span><span>Everything saved locally on this device</span></footer>
     ${isRecipeFormOpen ? recipeForm() : ''}
+    ${viewingRecipeId ? recipeDetails(getRecipe(viewingRecipeId)!) : ''}
   `
   bindEvents()
 }
@@ -226,18 +265,57 @@ const fillFormFromOcr = (text: string) => {
   }
 }
 
-const runOcr = async (file: File) => {
+const resizeImageForOcr = async (file: File) => {
+  const image = new Image()
+  const url = URL.createObjectURL(file)
+  try {
+    await new Promise<void>((resolve, reject) => {
+      image.onload = () => resolve()
+      image.onerror = () => reject(new Error('Unable to load this image.'))
+      image.src = url
+    })
+    const scale = Math.min(2.4, 2400 / Math.max(image.naturalWidth, image.naturalHeight))
+    const canvas = document.createElement('canvas')
+    canvas.width = Math.max(1, Math.round(image.naturalWidth * scale))
+    canvas.height = Math.max(1, Math.round(image.naturalHeight * scale))
+    const context = canvas.getContext('2d')!
+    context.drawImage(image, 0, 0, canvas.width, canvas.height)
+    const pixels = context.getImageData(0, 0, canvas.width, canvas.height)
+    for (let index = 0; index < pixels.data.length; index += 4) {
+      const luminance = pixels.data[index] * 0.299 + pixels.data[index + 1] * 0.587 + pixels.data[index + 2] * 0.114
+      const contrast = Math.max(0, Math.min(255, (luminance - 128) * 1.45 + 128))
+      pixels.data[index] = contrast
+      pixels.data[index + 1] = contrast
+      pixels.data[index + 2] = contrast
+    }
+    context.putImageData(pixels, 0, 0)
+    return await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('Unable to prepare this image.'))), 'image/jpeg', 0.85)
+    })
+  } finally {
+    URL.revokeObjectURL(url)
+  }
+}
+
+const runOcr = async (file: File, button: HTMLButtonElement) => {
   const status = document.querySelector<HTMLParagraphElement>('#ocr-status')
   if (!status) return
-  status.textContent = 'Reading the recipe card…'
+  button.disabled = true
+  status.textContent = 'Preparing the image…'
+  let worker: Awaited<ReturnType<typeof createWorker>> | undefined
   try {
-    const worker = await createWorker('eng')
-    const result = await worker.recognize(file)
-    await worker.terminate()
+    const image = await resizeImageForOcr(file)
+    status.textContent = 'Reading the recipe card…'
+    worker = await createWorker('eng')
+    await worker.setParameters({ tessedit_pageseg_mode: PSM.AUTO, preserve_interword_spaces: '1', user_defined_dpi: '300' })
+    const result = await worker.recognize(image, { rotateAuto: true })
     fillFormFromOcr(result.data.text)
-    status.textContent = 'Text extracted. Review the fields before saving.'
+    status.textContent = 'Text extracted with enhanced image processing. Review the fields before saving.'
   } catch (error) {
     status.textContent = error instanceof Error ? error.message : 'Unable to read this image.'
+  } finally {
+    await worker?.terminate()
+    button.disabled = false
   }
 }
 
@@ -264,19 +342,52 @@ const bindEvents = () => {
   document.querySelectorAll<HTMLElement>('[data-new-recipe]').forEach((button) => {
     button.addEventListener('click', () => {
       isRecipeFormOpen = true
+      selectedRecipeImage = undefined
       render()
     })
   })
+  document.querySelectorAll<HTMLElement>('[data-view-recipe]').forEach((button) => {
+      button.addEventListener('click', () => {
+        viewingRecipeId = button.dataset.viewRecipe!
+        render()
+      })
+    })
+    document.querySelectorAll<HTMLElement>('[data-close-details]').forEach((button) => {
+      button.addEventListener('click', (event) => {
+        if (event.target !== button) return
+        viewingRecipeId = null
+        render()
+      })
+    })
+    document.querySelectorAll<HTMLElement>('[data-delete-recipe]').forEach((button) => {
+      button.addEventListener('click', async () => {
+        const recipeId = button.dataset.deleteRecipe!
+        const recipe = getRecipe(recipeId)
+        if (!recipe || !window.confirm(`Delete "${recipe.name}"?`)) return
+        await deleteRecipe(recipeId)
+        recipes = await listRecipes()
+        plannedRecipes = plannedRecipes.filter((item) => item.recipeId !== recipeId)
+        savePlan()
+        if (viewingRecipeId === recipeId) viewingRecipeId = null
+        render()
+      })
+    })
   document.querySelectorAll<HTMLElement>('[data-close-modal]').forEach((button) => {
     button.addEventListener('click', (event) => {
-      if (event.target !== button && (event.target as HTMLElement).classList.contains('modal-backdrop')) return
+      if (event.target !== button) return
       isRecipeFormOpen = false
       render()
     })
   })
   document.querySelector<HTMLInputElement>('#recipe-image')?.addEventListener('change', (event) => {
-    const file = (event.target as HTMLInputElement).files?.[0]
-    if (file) void runOcr(file)
+    selectedRecipeImage = (event.target as HTMLInputElement).files?.[0]
+    const button = document.querySelector<HTMLButtonElement>('[data-run-ocr]')
+    if (button) button.disabled = !selectedRecipeImage
+    const status = document.querySelector<HTMLParagraphElement>('#ocr-status')
+    if (status && selectedRecipeImage) status.textContent = 'Image selected. Select “Read card” when ready.'
+  })
+  document.querySelector<HTMLButtonElement>('[data-run-ocr]')?.addEventListener('click', (event) => {
+    if (selectedRecipeImage) void runOcr(selectedRecipeImage, event.currentTarget as HTMLButtonElement)
   })
   document.querySelector<HTMLFormElement>('#recipe-form')?.addEventListener('submit', async (event) => {
     event.preventDefault()

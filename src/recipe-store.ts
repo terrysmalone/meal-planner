@@ -18,8 +18,49 @@ export type Recipe = {
 }
 
 const databaseName = 'operation-fish-for-life'
-const databaseVersion = 1
+const databaseVersion = 3
 const recipeStoreName = 'recipes'
+
+const chickenFajitaTrayBake: Recipe = {
+  id: 'loaded-chicken-fajita-tray-bake',
+  name: 'One Tray Loaded Chicken & Fries Fajita Tray Bake',
+  description: 'Loaded chicken, peppers, onions, and potatoes baked with fajita seasoning.',
+  time: 40,
+  servings: 2,
+  tags: ['Gluten-free', 'One pot'],
+  ingredients: [
+    { name: 'Cheddar cheese', quantity: 40, unit: 'g', category: 'Dairy' },
+    { name: 'Chicken breast strips', quantity: 250, unit: 'g', category: 'Protein' },
+    { name: 'Dried chilli flakes', quantity: 0.5, unit: 'tsp', category: 'Pantry' },
+    { name: 'Dried oregano', quantity: 1, unit: 'tsp', category: 'Pantry' },
+    { name: 'Garlic clove', quantity: 1, unit: '', category: 'Produce' },
+    { name: 'Ground cumin', quantity: 1, unit: 'tsp', category: 'Pantry' },
+    { name: 'Ground smoked paprika', quantity: 1, unit: 'tsp', category: 'Pantry' },
+    { name: 'Mayonnaise', quantity: 25, unit: 'ml', category: 'Pantry' },
+    { name: 'Red onion', quantity: 1, unit: '', category: 'Produce' },
+    { name: 'Red pepper', quantity: 1, unit: '', category: 'Produce' },
+    { name: 'White potato', quantity: 4, unit: '', category: 'Produce' },
+  ],
+}
+
+const chorizoSpaghetti: Recipe = {
+  id: 'chorizo-tomato-tenderstem-spaghetti',
+  name: 'Chorizo, Tomato & Tenderstem Spaghetti',
+  description: 'Chorizo spaghetti with cherry tomatoes, soft cheese, and tenderstem broccoli.',
+  time: 15,
+  servings: 2,
+  tags: ['10-minute meal'],
+  ingredients: [
+    { name: 'Cherry tomatoes', quantity: 125, unit: 'g', category: 'Produce' },
+    { name: 'Diced chorizo', quantity: 100, unit: 'g', category: 'Protein' },
+    { name: 'Grated Italian hard cheese', quantity: 30, unit: 'g', category: 'Dairy' },
+    { name: 'Roasted garlic paste', quantity: 15, unit: 'g', category: 'Pantry' },
+    { name: 'Soft cheese', quantity: 50, unit: 'g', category: 'Dairy' },
+    { name: 'Spaghetti', quantity: 190, unit: 'g', category: 'Pantry' },
+    { name: 'Tenderstem broccoli', quantity: 80, unit: 'g', category: 'Produce' },
+    { name: 'Tomato paste', quantity: 16, unit: 'g', category: 'Pantry' },
+  ],
+}
 
 export const starterRecipes: Recipe[] = [
   {
@@ -40,6 +81,8 @@ export const starterRecipes: Recipe[] = [
       { name: 'Sriracha or chilli sauce', quantity: 8, unit: 'ml', category: 'Pantry' },
     ],
   },
+  chickenFajitaTrayBake,
+  chorizoSpaghetti,
 ]
 
 let databasePromise: Promise<IDBDatabase> | undefined
@@ -50,8 +93,11 @@ const openDatabase = () => {
     const request = indexedDB.open(databaseName, databaseVersion)
     request.onerror = () => reject(request.error ?? new Error('Unable to open the recipe database.'))
     request.onsuccess = () => resolve(request.result)
-    request.onupgradeneeded = () => {
-      request.result.createObjectStore(recipeStoreName, { keyPath: 'id' })
+    request.onupgradeneeded = (event) => {
+      const database = request.result
+      if (event.oldVersion < 1) database.createObjectStore(recipeStoreName, { keyPath: 'id' })
+      if (event.oldVersion < 2) request.transaction?.objectStore(recipeStoreName).put(chickenFajitaTrayBake)
+      if (event.oldVersion < 3) request.transaction?.objectStore(recipeStoreName).put(chorizoSpaghetti)
     }
   })
   return databasePromise
@@ -76,6 +122,16 @@ export const saveRecipe = async (recipe: Recipe) => {
   transaction.objectStore(recipeStoreName).put(recipe)
   await new Promise<void>((resolve, reject) => {
     transaction.onerror = () => reject(transaction.error ?? new Error('Unable to save the recipe.'))
+    transaction.oncomplete = () => resolve()
+  })
+}
+
+export const deleteRecipe = async (id: string) => {
+  const database = await openDatabase()
+  const transaction = database.transaction(recipeStoreName, 'readwrite')
+  transaction.objectStore(recipeStoreName).delete(id)
+  await new Promise<void>((resolve, reject) => {
+    transaction.onerror = () => reject(transaction.error ?? new Error('Unable to delete the recipe.'))
     transaction.oncomplete = () => resolve()
   })
 }
