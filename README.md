@@ -1,4 +1,4 @@
-# Pantry & Plate
+# Operation Fish for Life
 
 A local-first meal planner for choosing weekly recipes and generating a combined shopping list.
 

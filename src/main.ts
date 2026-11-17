@@ -181,7 +181,7 @@ const render = () => {
   const totalServings = plannedRecipes.reduce((total, item) => total + item.servings, 0)
   app.innerHTML = `
     <header class="topbar">
-      <a class="brand" href="#"><span class="brand-mark">✦</span><span>Pantry <em>&</em> Plate</span></a>
+      <a class="brand" href="#"><span class="brand-mark">✦</span><span>Operation Fish for Life</span></a>
       <nav>
         <button class="${activeView === 'plan' ? 'active' : ''}" data-view="plan">Weekly plan</button>
         <button class="${activeView === 'recipes' ? 'active' : ''}" data-view="recipes">My recipes</button>
@@ -192,7 +192,7 @@ const render = () => {
       <section class="hero">
         <div>
           <div class="eyebrow">WEEK OF OCTOBER 14–20</div>
-          <h1>Plan less.<br><i>Eat better.</i></h1>
+          <h1>Give someone a fish and they'll eat for a day.<br><i>Teach them how to fish and they'll eat for life.</i></h1>
           <p>Choose your meals for the week and we’ll take care of the shopping list.</p>
         </div>
         <div class="week-summary"><span class="summary-label">THIS WEEK</span><strong>${plannedRecipes.length} <small>meals</small></strong><span>${totalServings} servings planned</span></div>
@@ -214,7 +214,7 @@ const render = () => {
             </div>`
       }
     </main>
-    <footer><span>Pantry & Plate</span><span>Everything saved locally on this device</span></footer>
+    <footer><span>Operation Fish for Life</span><span>Everything saved locally on this device</span></footer>
   `
   bindEvents()
 }
