@@ -1,163 +1,69 @@
 [
   {
-    "id": "peri-peri-halloumi-rice",
-    "name": "Peri Peri Fried Rice With Halloumi & Chilli Mayo",
-    "description": "Peri peri fried rice with golden halloumi and chilli mayo.",
-    "time": 20,
-    "servings": 2,
-    "tags": ["Vegetarian", "Quick"],
-    "ingredients": [
-      { "name": "Blanched peas", "quantity": 240, "unit": "g", "category": "Produce" },
-      { "name": "Cooked white long grain rice", "quantity": 420, "unit": "g", "category": "Pantry" },
-      { "name": "Garlic clove", "quantity": 2, "unit": "", "category": "Produce" },
-      { "name": "Halloumi", "quantity": 300, "unit": "g", "category": "Dairy" },
-      { "name": "Mayonnaise", "quantity": 75, "unit": "ml", "category": "Pantry" },
-      { "name": "Peri peri spice mix", "quantity": 1.5, "unit": "tbsp", "category": "Pantry" },
-      { "name": "Red pepper", "quantity": 2, "unit": "", "category": "Produce" },
-      { "name": "Sriracha or chilli sauce", "quantity": 12, "unit": "ml", "category": "Pantry" }
-    ]
-  },
-  {
-    "id": "loaded-chicken-fajita-tray-bake",
-    "name": "One Tray Loaded Chicken & Fries Fajita Tray Bake",
-    "description": "Loaded chicken, peppers, onions, and potatoes baked with fajita seasoning.",
+    "id": "battered-basa-chips-mushy-peas",
+    "name": "Battered Basa With Salt & Vinegar Chips And Mushy Peas",
+    "description": "Battered basa with salt and vinegar chips, mushy peas, and a tangy mayonnaise sauce.",
     "time": 40,
     "servings": 2,
-    "tags": ["Gluten-free", "One pot"],
+    "tags": [
+      "Dairy-free",
+      "30-minute meal"
+    ],
     "ingredients": [
-      { "name": "Cheddar cheese", "quantity": 60, "unit": "g", "category": "Dairy" },
-      { "name": "Chicken breast strips", "quantity": 375, "unit": "g", "category": "Protein" },
-      { "name": "Dried chilli flakes", "quantity": 0.75, "unit": "tsp", "category": "Pantry" },
-      { "name": "Dried oregano", "quantity": 1.5, "unit": "tsp", "category": "Pantry" },
-      { "name": "Garlic clove", "quantity": 2, "unit": "", "category": "Produce" },
-      { "name": "Ground cumin", "quantity": 1.5, "unit": "tsp", "category": "Pantry" },
-      { "name": "Ground smoked paprika", "quantity": 1.5, "unit": "tsp", "category": "Pantry" },
-      { "name": "Mayonnaise", "quantity": 37.5, "unit": "ml", "category": "Pantry" },
-      { "name": "Red onion", "quantity": 2, "unit": "", "category": "Produce" },
-      { "name": "Red pepper", "quantity": 2, "unit": "", "category": "Produce" },
-      { "name": "White potato", "quantity": 6, "unit": "", "category": "Produce" }
-    ]
-  },
-  {
-    "id": "chorizo-tomato-tenderstem-spaghetti",
-    "name": "Chorizo, Tomato & Tenderstem Spaghetti",
-    "description": "Chorizo spaghetti with cherry tomatoes, soft cheese, and tenderstem broccoli.",
-    "time": 15,
-    "servings": 2,
-    "tags": ["10-minute meal"],
-    "ingredients": [
-      { "name": "Cherry tomatoes", "quantity": 190, "unit": "g", "category": "Produce" },
-      { "name": "Diced chorizo", "quantity": 150, "unit": "g", "category": "Protein" },
-      { "name": "Grated Italian hard cheese", "quantity": 45, "unit": "g", "category": "Dairy" },
-      { "name": "Roasted garlic paste", "quantity": 22.5, "unit": "g", "category": "Pantry" },
-      { "name": "Soft cheese", "quantity": 75, "unit": "g", "category": "Dairy" },
-      { "name": "Spaghetti", "quantity": 285, "unit": "g", "category": "Pantry" },
-      { "name": "Tenderstem broccoli", "quantity": 120, "unit": "g", "category": "Produce" },
-      { "name": "Tomato paste", "quantity": 24, "unit": "g", "category": "Pantry" }
-    ]
-  },
-  {
-    "id": "cheesy-mexican-style-rice",
-    "name": "Cheesy Mexican-Style Rice With Crème Fraîche",
-    "description": "Cheesy Mexican-style rice with black beans, peppers, tomatoes, and crème fraîche.",
-    "time": 15,
-    "servings": 2,
-    "tags": ["Vegetarian", "Gluten-free", "10-minute meal"],
-    "ingredients": [
-      { "name": "Black beans", "quantity": 450, "unit": "g", "category": "Pantry" },
-      { "name": "Chipotle paste", "quantity": 75, "unit": "g", "category": "Pantry" },
-      { "name": "Chives", "quantity": 7.5, "unit": "g", "category": "Produce" },
-      { "name": "Cooked white long grain rice", "quantity": 420, "unit": "g", "category": "Pantry" },
-      { "name": "Crème fraîche", "quantity": 120, "unit": "g", "category": "Dairy" },
-      { "name": "Finely chopped tomatoes", "quantity": 300, "unit": "g", "category": "Produce" },
-      { "name": "Ground cumin", "quantity": 1.5, "unit": "tsp", "category": "Pantry" },
-      { "name": "Ground smoked paprika", "quantity": 3, "unit": "tsp", "category": "Pantry" },
-      { "name": "Mozzarella", "quantity": 187.5, "unit": "g", "category": "Dairy" },
-      { "name": "Red pepper", "quantity": 2, "unit": "", "category": "Produce" },
-      { "name": "Roasted garlic paste", "quantity": 22.5, "unit": "g", "category": "Pantry" },
-      { "name": "Shallot", "quantity": 2, "unit": "", "category": "Produce" },
-      { "name": "Sriracha", "quantity": 1.5, "unit": "tbsp", "category": "Pantry" },
-      { "name": "Vegetable stock mix", "quantity": 8.25, "unit": "g", "category": "Pantry" }
-    ]
-  },
-  {
-    "id": "hoisin-chicken-rice",
-    "name": "Hoisin Chicken & Rice",
-    "description": "Hoisin chicken with rice, sweet pea pods, mushrooms, and toasted sesame seeds.",
-    "time": 15,
-    "servings": 2,
-    "tags": ["Dairy-free", "10-minute meal"],
-    "ingredients": [
-      { "name": "Cooked white long grain rice", "quantity": 420, "unit": "g", "category": "Pantry" },
-      { "name": "Cornflour", "quantity": 1.5, "unit": "tbsp", "category": "Pantry" },
-      { "name": "Diced chicken breast", "quantity": 375, "unit": "g", "category": "Protein" },
-      { "name": "Ginger & garlic paste", "quantity": 22.5, "unit": "g", "category": "Pantry" },
-      { "name": "Hoisin sauce", "quantity": 60, "unit": "g", "category": "Pantry" },
-      { "name": "Soy sauce", "quantity": 22.5, "unit": "ml", "category": "Pantry" },
-      { "name": "Sweet pea pods", "quantity": 120, "unit": "g", "category": "Produce" },
-      { "name": "Toasted sesame seeds", "quantity": 7.5, "unit": "g", "category": "Pantry" },
-      { "name": "White cup mushrooms", "quantity": 240, "unit": "g", "category": "Produce" }
-    ]
-  },
-  {
-    "id": "saucy-onion-gravy-beef-meatballs",
-    "name": "Saucy Onion Gravy Beef Meatballs & Crushed Potatoes",
-    "description": "Beef meatballs with onion gravy, crushed potatoes, and tenderstem broccoli.",
-    "time": 23,
-    "servings": 2,
-    "tags": ["Gluten-free", "Dairy-free"],
-    "ingredients": [
-      { "name": "Beef mince", "quantity": 375, "unit": "g", "category": "Protein" },
-      { "name": "Brown onion", "quantity": 2, "unit": "", "category": "Produce" },
-      { "name": "Cornflour", "quantity": 1.5, "unit": "tbsp", "category": "Pantry" },
-      { "name": "Garlic clove", "quantity": 2, "unit": "", "category": "Produce" },
-      { "name": "Gravy base", "quantity": 21, "unit": "g", "category": "Pantry" },
-      { "name": "Onion marmalade", "quantity": 30, "unit": "g", "category": "Pantry" },
-      { "name": "Tenderstem broccoli", "quantity": 240, "unit": "g", "category": "Produce" },
-      { "name": "Tomato paste", "quantity": 24, "unit": "g", "category": "Pantry" },
-      { "name": "White potato", "quantity": 5, "unit": "", "category": "Produce" }
-    ]
-  },
-  {
-    "id": "chicken-butternut-squash-korma",
-    "name": "Chicken & Butternut Squash Korma With Rice And Naan",
-    "description": "Mild chicken and butternut squash korma with rice, almonds, coriander, and mini garlic naans.",
-    "time": 20,
-    "servings": 2,
-    "tags": ["Dairy-free", "10-minute meal"],
-    "ingredients": [
-      { "name": "Butternut squash cubes", "quantity": 240, "unit": "g", "category": "Produce" },
-      { "name": "Cooked white long grain rice", "quantity": 420, "unit": "g", "category": "Pantry" },
-      { "name": "Coriander", "quantity": 7.5, "unit": "g", "category": "Produce" },
-      { "name": "Curry powder", "quantity": 0.75, "unit": "tbsp", "category": "Pantry" },
-      { "name": "Diced chicken breast", "quantity": 375, "unit": "g", "category": "Protein" },
-      { "name": "Flaked almonds", "quantity": 22.5, "unit": "g", "category": "Pantry" },
-      { "name": "Mini garlic & coriander naans", "quantity": 3, "unit": "", "category": "Pantry" },
-      { "name": "Solid creamed coconut", "quantity": 37.5, "unit": "g", "category": "Pantry" }
-    ]
-  },
-  {
-    "id": "saag-aloo-peas-pitta",
-    "name": "Saag Aloo With Peas And Pitta",
-    "description": "Plant-based saag aloo with peas, spinach, spiced potatoes, and wholemeal pittas.",
-    "time": 20,
-    "servings": 2,
-    "tags": ["Plant-based", "Dairy-free", "10-minute meal"],
-    "ingredients": [
-      { "name": "Blanched peas", "quantity": 240, "unit": "g", "category": "Produce" },
-      { "name": "Cumin seeds", "quantity": 1.5, "unit": "tsp", "category": "Pantry" },
-      { "name": "Curry powder", "quantity": 0.75, "unit": "tbsp", "category": "Pantry" },
-      { "name": "Ginger & garlic paste", "quantity": 22.5, "unit": "g", "category": "Pantry" },
-      { "name": "Ground turmeric", "quantity": 0.75, "unit": "tsp", "category": "Pantry" },
-      { "name": "Mango chutney", "quantity": 30, "unit": "g", "category": "Pantry" },
-      { "name": "Red chilli", "quantity": 1.5, "unit": "", "category": "Produce" },
-      { "name": "Solid creamed coconut", "quantity": 37.5, "unit": "g", "category": "Pantry" },
-      { "name": "Spinach", "quantity": 180, "unit": "g", "category": "Produce" },
-      { "name": "Toasted sesame seeds", "quantity": 7.5, "unit": "g", "category": "Pantry" },
-      { "name": "Tomato paste", "quantity": 24, "unit": "g", "category": "Pantry" },
-      { "name": "Vegetable stock mix", "quantity": 8.25, "unit": "g", "category": "Pantry" },
-      { "name": "Waxy potatoes", "quantity": 525, "unit": "g", "category": "Produce" },
-      { "name": "Wholemeal pittas", "quantity": 3, "unit": "", "category": "Pantry" }
+      {
+        "name": "Basa fillets",
+        "quantity": 3,
+        "unit": "",
+        "category": "Protein"
+      },
+      {
+        "name": "Blanched peas",
+        "quantity": 240,
+        "unit": "g",
+        "category": "Produce"
+      },
+      {
+        "name": "Lemon",
+        "quantity": 1.5,
+        "unit": "",
+        "category": "Produce"
+      },
+      {
+        "name": "Marmite",
+        "quantity": 12,
+        "unit": "g",
+        "category": "Pantry"
+      },
+      {
+        "name": "Mayonnaise",
+        "quantity": 75,
+        "unit": "ml",
+        "category": "Pantry"
+      },
+      {
+        "name": "Red wine vinegar",
+        "quantity": 45,
+        "unit": "ml",
+        "category": "Pantry"
+      },
+      {
+        "name": "Shallot",
+        "quantity": 3,
+        "unit": "",
+        "category": "Produce"
+      },
+      {
+        "name": "Tomato ketchup",
+        "quantity": 45,
+        "unit": "ml",
+        "category": "Pantry"
+      },
+      {
+        "name": "White potato",
+        "quantity": 4.5,
+        "unit": "",
+        "category": "Produce"
+      }
     ]
   },
   {
@@ -166,57 +72,76 @@
     "description": "Beef and mushroom bolognese with carrots, tomatoes, lighter cheese, and wholewheat tortiglioni.",
     "time": 40,
     "servings": 2,
-    "tags": ["30-minute meal"],
+    "tags": [
+      "30-minute meal"
+    ],
     "ingredients": [
-      { "name": "Beef mince", "quantity": 187.5, "unit": "g", "category": "Protein" },
-      { "name": "Beef stock mix (intense)", "quantity": 8.25, "unit": "g", "category": "Pantry" },
-      { "name": "Brown onion", "quantity": 1.5, "unit": "", "category": "Produce" },
-      { "name": "Carrot", "quantity": 1.5, "unit": "", "category": "Produce" },
-      { "name": "Chestnut mushrooms", "quantity": 240, "unit": "g", "category": "Produce" },
-      { "name": "Dried oregano", "quantity": 1.5, "unit": "tsp", "category": "Pantry" },
-      { "name": "Finely chopped tomatoes", "quantity": 300, "unit": "g", "category": "Produce" },
-      { "name": "Garlic clove", "quantity": 3, "unit": "", "category": "Produce" },
-      { "name": "Lighter cheese", "quantity": 45, "unit": "g", "category": "Dairy" },
-      { "name": "Soy sauce", "quantity": 12, "unit": "ml", "category": "Pantry" },
-      { "name": "Wholewheat tortiglioni", "quantity": 225, "unit": "g", "category": "Pantry" }
-    ]
-  },
-  {
-    "id": "battered-basa-chips-mushy-peas",
-    "name": "Battered Basa With Salt & Vinegar Chips And Mushy Peas",
-    "description": "Battered basa with salt and vinegar chips, mushy peas, and a tangy mayonnaise sauce.",
-    "time": 40,
-    "servings": 2,
-    "tags": ["Dairy-free", "30-minute meal"],
-    "ingredients": [
-      { "name": "Basa fillets", "quantity": 3, "unit": "", "category": "Protein" },
-      { "name": "Blanched peas", "quantity": 240, "unit": "g", "category": "Produce" },
-      { "name": "Lemon", "quantity": 1.5, "unit": "", "category": "Produce" },
-      { "name": "Marmite", "quantity": 12, "unit": "g", "category": "Pantry" },
-      { "name": "Mayonnaise", "quantity": 75, "unit": "ml", "category": "Pantry" },
-      { "name": "Red wine vinegar", "quantity": 45, "unit": "ml", "category": "Pantry" },
-      { "name": "Shallot", "quantity": 3, "unit": "", "category": "Produce" },
-      { "name": "Tomato ketchup", "quantity": 45, "unit": "ml", "category": "Pantry" },
-      { "name": "White potato", "quantity": 4.5, "unit": "", "category": "Produce" }
-    ]
-  },
-  {
-    "id": "herby-chicken-creamy-leek-mash",
-    "name": "Herby Chicken With Creamy Leek Sauce And Buttery Mash",
-    "description": "Herby chicken with creamy leek sauce, carrots, and buttery mashed potatoes.",
-    "time": 50,
-    "servings": 2,
-    "tags": ["40-minute meal"],
-    "ingredients": [
-      { "name": "Carrot", "quantity": 3, "unit": "", "category": "Produce" },
-      { "name": "Chicken breast portion", "quantity": 3, "unit": "", "category": "Protein" },
-      { "name": "Chicken stock mix (intense)", "quantity": 8.25, "unit": "g", "category": "Pantry" },
-      { "name": "Crème fraîche", "quantity": 120, "unit": "g", "category": "Dairy" },
-      { "name": "Dijon mustard", "quantity": 8.25, "unit": "g", "category": "Pantry" },
-      { "name": "Dried thyme", "quantity": 0.75, "unit": "tsp", "category": "Pantry" },
-      { "name": "Garlic clove", "quantity": 1.5, "unit": "", "category": "Produce" },
-      { "name": "Leek", "quantity": 1.5, "unit": "", "category": "Produce" },
-      { "name": "White potato", "quantity": 6, "unit": "", "category": "Produce" }
+      {
+        "name": "Beef mince",
+        "quantity": 187.5,
+        "unit": "g",
+        "category": "Protein"
+      },
+      {
+        "name": "Beef stock mix (intense)",
+        "quantity": 8.25,
+        "unit": "g",
+        "category": "Pantry"
+      },
+      {
+        "name": "Brown onion",
+        "quantity": 1.5,
+        "unit": "",
+        "category": "Produce"
+      },
+      {
+        "name": "Carrot",
+        "quantity": 1.5,
+        "unit": "",
+        "category": "Produce"
+      },
+      {
+        "name": "Chestnut mushrooms",
+        "quantity": 240,
+        "unit": "g",
+        "category": "Produce"
+      },
+      {
+        "name": "Dried oregano",
+        "quantity": 1.5,
+        "unit": "tsp",
+        "category": "Pantry"
+      },
+      {
+        "name": "Finely chopped tomatoes",
+        "quantity": 300,
+        "unit": "g",
+        "category": "Produce"
+      },
+      {
+        "name": "Garlic clove",
+        "quantity": 3,
+        "unit": "",
+        "category": "Produce"
+      },
+      {
+        "name": "Lighter cheese",
+        "quantity": 45,
+        "unit": "g",
+        "category": "Dairy"
+      },
+      {
+        "name": "Soy sauce",
+        "quantity": 12,
+        "unit": "ml",
+        "category": "Pantry"
+      },
+      {
+        "name": "Wholewheat tortiglioni",
+        "quantity": 225,
+        "unit": "g",
+        "category": "Pantry"
+      }
     ]
   },
   {
@@ -225,18 +150,728 @@
     "description": "Cheesy black bean enchiladas with spinach, red onion, and smoky spices.",
     "time": 40,
     "servings": 2,
-    "tags": ["Vegetarian", "30-minute meal"],
+    "tags": [
+      "Vegetarian",
+      "30-minute meal"
+    ],
     "ingredients": [
-      { "name": "Black beans", "quantity": 570, "unit": "g", "category": "Pantry" },
-      { "name": "Cheddar cheese", "quantity": 60, "unit": "g", "category": "Dairy" },
-      { "name": "Garlic clove", "quantity": 3, "unit": "", "category": "Produce" },
-      { "name": "Ground cumin", "quantity": 1.5, "unit": "tsp", "category": "Pantry" },
-      { "name": "Ground smoked paprika", "quantity": 3, "unit": "tsp", "category": "Pantry" },
-      { "name": "Plain tortillas", "quantity": 9, "unit": "", "category": "Pantry" },
-      { "name": "Red onion", "quantity": 1.5, "unit": "", "category": "Produce" },
-      { "name": "Spinach", "quantity": 120, "unit": "g", "category": "Produce" },
-      { "name": "Tomato paste", "quantity": 24, "unit": "g", "category": "Pantry" },
-      { "name": "Vegetable stock mix (intense)", "quantity": 8.25, "unit": "g", "category": "Pantry" }
+      {
+        "name": "Black beans",
+        "quantity": 1,
+        "unit": "can(s)",
+        "category": "Pantry"
+      },
+      {
+        "name": "Cheddar cheese",
+        "quantity": 60,
+        "unit": "g",
+        "category": "Dairy"
+      },
+      {
+        "name": "Garlic clove",
+        "quantity": 3,
+        "unit": "",
+        "category": "Produce"
+      },
+      {
+        "name": "Ground cumin",
+        "quantity": 1.5,
+        "unit": "tsp",
+        "category": "Pantry"
+      },
+      {
+        "name": "Ground smoked paprika",
+        "quantity": 3,
+        "unit": "tsp",
+        "category": "Pantry"
+      },
+      {
+        "name": "Plain tortillas",
+        "quantity": 8,
+        "unit": "",
+        "category": "Pantry"
+      },
+      {
+        "name": "Red onion",
+        "quantity": 1.5,
+        "unit": "",
+        "category": "Produce"
+      },
+      {
+        "name": "Spinach",
+        "quantity": 120,
+        "unit": "g",
+        "category": "Produce"
+      },
+      {
+        "name": "Tomato paste",
+        "quantity": 24,
+        "unit": "g",
+        "category": "Pantry"
+      },
+      {
+        "name": "Vegetable stock mix (intense)",
+        "quantity": 8.25,
+        "unit": "g",
+        "category": "Pantry"
+      }
+    ]
+  },
+  {
+    "id": "cheesy-mexican-style-rice",
+    "name": "Cheesy Mexican-Style Rice With Crème Fraîche",
+    "description": "Cheesy Mexican-style rice with black beans, peppers, tomatoes, and crème fraîche.",
+    "time": 15,
+    "servings": 2,
+    "tags": [
+      "Vegetarian",
+      "Gluten-free",
+      "10-minute meal"
+    ],
+    "ingredients": [
+      {
+        "name": "Black beans",
+        "quantity": 1,
+        "unit": "can(s)",
+        "category": "Pantry"
+      },
+      {
+        "name": "Chipotle paste",
+        "quantity": 75,
+        "unit": "g",
+        "category": "Pantry"
+      },
+      {
+        "name": "Chives",
+        "quantity": 7.5,
+        "unit": "g",
+        "category": "Produce"
+      },
+      {
+        "name": "Cooked white long grain rice",
+        "quantity": 420,
+        "unit": "g",
+        "category": "Pantry"
+      },
+      {
+        "name": "Crème fraîche",
+        "quantity": 120,
+        "unit": "g",
+        "category": "Dairy"
+      },
+      {
+        "name": "Finely chopped tomatoes",
+        "quantity": 300,
+        "unit": "g",
+        "category": "Produce"
+      },
+      {
+        "name": "Ground cumin",
+        "quantity": 1.5,
+        "unit": "tsp",
+        "category": "Pantry"
+      },
+      {
+        "name": "Ground smoked paprika",
+        "quantity": 3,
+        "unit": "tsp",
+        "category": "Pantry"
+      },
+      {
+        "name": "Mozzarella",
+        "quantity": 187.5,
+        "unit": "g",
+        "category": "Dairy"
+      },
+      {
+        "name": "Red pepper",
+        "quantity": 2,
+        "unit": "",
+        "category": "Produce"
+      },
+      {
+        "name": "Roasted garlic paste",
+        "quantity": 22.5,
+        "unit": "g",
+        "category": "Pantry"
+      },
+      {
+        "name": "Shallot",
+        "quantity": 2,
+        "unit": "",
+        "category": "Produce"
+      },
+      {
+        "name": "Sriracha",
+        "quantity": 1.5,
+        "unit": "tbsp",
+        "category": "Pantry"
+      },
+      {
+        "name": "Vegetable stock mix",
+        "quantity": 8.25,
+        "unit": "g",
+        "category": "Pantry"
+      }
+    ]
+  },
+  {
+    "id": "chicken-butternut-squash-korma",
+    "name": "Chicken & Butternut Squash Korma With Rice And Naan",
+    "description": "Mild chicken and butternut squash korma with rice, almonds, coriander, and mini garlic naans.",
+    "time": 20,
+    "servings": 2,
+    "tags": [
+      "Dairy-free",
+      "10-minute meal"
+    ],
+    "ingredients": [
+      {
+        "name": "Butternut squash cubes",
+        "quantity": 240,
+        "unit": "g",
+        "category": "Produce"
+      },
+      {
+        "name": "Cooked white long grain rice",
+        "quantity": 420,
+        "unit": "g",
+        "category": "Pantry"
+      },
+      {
+        "name": "Coriander",
+        "quantity": 7.5,
+        "unit": "g",
+        "category": "Produce"
+      },
+      {
+        "name": "Curry powder",
+        "quantity": 0.75,
+        "unit": "tbsp",
+        "category": "Pantry"
+      },
+      {
+        "name": "Diced chicken breast",
+        "quantity": 375,
+        "unit": "g",
+        "category": "Protein"
+      },
+      {
+        "name": "Flaked almonds",
+        "quantity": 22.5,
+        "unit": "g",
+        "category": "Pantry"
+      },
+      {
+        "name": "Mini garlic & coriander naans",
+        "quantity": 3,
+        "unit": "",
+        "category": "Pantry"
+      },
+      {
+        "name": "Solid creamed coconut",
+        "quantity": 37.5,
+        "unit": "g",
+        "category": "Pantry"
+      }
+    ]
+  },
+  {
+    "id": "chorizo-tomato-tenderstem-spaghetti",
+    "name": "Chorizo, Tomato & Tenderstem Spaghetti",
+    "description": "Chorizo spaghetti with cherry tomatoes, soft cheese, and tenderstem broccoli.",
+    "time": 15,
+    "servings": 2,
+    "tags": [
+      "10-minute meal"
+    ],
+    "ingredients": [
+      {
+        "name": "Cherry tomatoes",
+        "quantity": 187.5,
+        "unit": "g",
+        "category": "Produce"
+      },
+      {
+        "name": "Diced chorizo",
+        "quantity": 150,
+        "unit": "g",
+        "category": "Protein"
+      },
+      {
+        "name": "Grated Italian hard cheese",
+        "quantity": 45,
+        "unit": "g",
+        "category": "Dairy"
+      },
+      {
+        "name": "Roasted garlic paste",
+        "quantity": 22.5,
+        "unit": "g",
+        "category": "Pantry"
+      },
+      {
+        "name": "Soft cheese",
+        "quantity": 75,
+        "unit": "g",
+        "category": "Dairy"
+      },
+      {
+        "name": "Spaghetti",
+        "quantity": 375,
+        "unit": "g",
+        "category": "Pantry"
+      },
+      {
+        "name": "Tenderstem broccoli",
+        "quantity": 120,
+        "unit": "g",
+        "category": "Produce"
+      },
+      {
+        "name": "Tomato paste",
+        "quantity": 24,
+        "unit": "g",
+        "category": "Pantry"
+      }
+    ]
+  },
+  {
+    "id": "herby-chicken-creamy-leek-mash",
+    "name": "Herby Chicken With Creamy Leek Sauce And Buttery Mash",
+    "description": "Herby chicken with creamy leek sauce, carrots, and buttery mashed potatoes.",
+    "time": 50,
+    "servings": 2,
+    "tags": [
+      "40-minute meal"
+    ],
+    "ingredients": [
+      {
+        "name": "Carrot",
+        "quantity": 3,
+        "unit": "",
+        "category": "Produce"
+      },
+      {
+        "name": "Chicken breast portion",
+        "quantity": 3,
+        "unit": "",
+        "category": "Protein"
+      },
+      {
+        "name": "Chicken stock mix (intense)",
+        "quantity": 8.25,
+        "unit": "g",
+        "category": "Pantry"
+      },
+      {
+        "name": "Crème fraîche",
+        "quantity": 120,
+        "unit": "g",
+        "category": "Dairy"
+      },
+      {
+        "name": "Dijon mustard",
+        "quantity": 8.25,
+        "unit": "g",
+        "category": "Pantry"
+      },
+      {
+        "name": "Dried thyme",
+        "quantity": 0.75,
+        "unit": "tsp",
+        "category": "Pantry"
+      },
+      {
+        "name": "Garlic clove",
+        "quantity": 1.5,
+        "unit": "",
+        "category": "Produce"
+      },
+      {
+        "name": "Leek",
+        "quantity": 1.5,
+        "unit": "",
+        "category": "Produce"
+      },
+      {
+        "name": "White potato",
+        "quantity": 6,
+        "unit": "",
+        "category": "Produce"
+      }
+    ]
+  },
+  {
+    "id": "hoisin-chicken-rice",
+    "name": "Hoisin Chicken & Rice",
+    "description": "Hoisin chicken with rice, sweet pea pods, mushrooms, and toasted sesame seeds.",
+    "time": 15,
+    "servings": 2,
+    "tags": [
+      "Dairy-free",
+      "10-minute meal"
+    ],
+    "ingredients": [
+      {
+        "name": "Cooked white long grain rice",
+        "quantity": 420,
+        "unit": "g",
+        "category": "Pantry"
+      },
+      {
+        "name": "Cornflour",
+        "quantity": 1.5,
+        "unit": "tbsp",
+        "category": "Pantry"
+      },
+      {
+        "name": "Diced chicken breast",
+        "quantity": 375,
+        "unit": "g",
+        "category": "Protein"
+      },
+      {
+        "name": "Ginger & garlic paste",
+        "quantity": 22.5,
+        "unit": "g",
+        "category": "Pantry"
+      },
+      {
+        "name": "Hoisin sauce",
+        "quantity": 60,
+        "unit": "g",
+        "category": "Pantry"
+      },
+      {
+        "name": "Soy sauce",
+        "quantity": 22.5,
+        "unit": "ml",
+        "category": "Pantry"
+      },
+      {
+        "name": "Sweet pea pods",
+        "quantity": 120,
+        "unit": "g",
+        "category": "Produce"
+      },
+      {
+        "name": "Toasted sesame seeds",
+        "quantity": 7.5,
+        "unit": "g",
+        "category": "Pantry"
+      },
+      {
+        "name": "White cup mushrooms",
+        "quantity": 240,
+        "unit": "g",
+        "category": "Produce"
+      }
+    ]
+  },
+  {
+    "id": "loaded-chicken-fajita-tray-bake",
+    "name": "One Tray Loaded Chicken & Fries Fajita Tray Bake",
+    "description": "Loaded chicken, peppers, onions, and potatoes baked with fajita seasoning.",
+    "time": 40,
+    "servings": 2,
+    "tags": [
+      "Gluten-free",
+      "One pot"
+    ],
+    "ingredients": [
+      {
+        "name": "Cheddar cheese",
+        "quantity": 60,
+        "unit": "g",
+        "category": "Dairy"
+      },
+      {
+        "name": "Chicken breast strips",
+        "quantity": 375,
+        "unit": "g",
+        "category": "Protein"
+      },
+      {
+        "name": "Dried chilli flakes",
+        "quantity": 0.75,
+        "unit": "tsp",
+        "category": "Pantry"
+      },
+      {
+        "name": "Dried oregano",
+        "quantity": 1.5,
+        "unit": "tsp",
+        "category": "Pantry"
+      },
+      {
+        "name": "Garlic clove",
+        "quantity": 2,
+        "unit": "",
+        "category": "Produce"
+      },
+      {
+        "name": "Ground cumin",
+        "quantity": 1.5,
+        "unit": "tsp",
+        "category": "Pantry"
+      },
+      {
+        "name": "Ground smoked paprika",
+        "quantity": 1.5,
+        "unit": "tsp",
+        "category": "Pantry"
+      },
+      {
+        "name": "Mayonnaise",
+        "quantity": 37.5,
+        "unit": "ml",
+        "category": "Pantry"
+      },
+      {
+        "name": "Red onion",
+        "quantity": 2,
+        "unit": "",
+        "category": "Produce"
+      },
+      {
+        "name": "Red pepper",
+        "quantity": 2,
+        "unit": "",
+        "category": "Produce"
+      },
+      {
+        "name": "White potato",
+        "quantity": 6,
+        "unit": "",
+        "category": "Produce"
+      }
+    ]
+  },
+  {
+    "id": "peri-peri-halloumi-rice",
+    "name": "Peri Peri Fried Rice With Halloumi & Chilli Mayo",
+    "description": "Peri peri fried rice with golden halloumi and chilli mayo.",
+    "time": 20,
+    "servings": 2,
+    "tags": [
+      "Vegetarian",
+      "Quick"
+    ],
+    "ingredients": [
+      {
+        "name": "Blanched peas",
+        "quantity": 240,
+        "unit": "g",
+        "category": "Produce"
+      },
+      {
+        "name": "Cooked white long grain rice",
+        "quantity": 420,
+        "unit": "g",
+        "category": "Pantry"
+      },
+      {
+        "name": "Garlic clove",
+        "quantity": 2,
+        "unit": "",
+        "category": "Produce"
+      },
+      {
+        "name": "Halloumi",
+        "quantity": 300,
+        "unit": "g",
+        "category": "Dairy"
+      },
+      {
+        "name": "Mayonnaise",
+        "quantity": 75,
+        "unit": "ml",
+        "category": "Pantry"
+      },
+      {
+        "name": "Peri peri spice mix",
+        "quantity": 1.5,
+        "unit": "tbsp",
+        "category": "Pantry"
+      },
+      {
+        "name": "Red pepper",
+        "quantity": 2,
+        "unit": "",
+        "category": "Produce"
+      },
+      {
+        "name": "Sriracha or chilli sauce",
+        "quantity": 12,
+        "unit": "ml",
+        "category": "Pantry"
+      }
+    ]
+  },
+  {
+    "id": "saag-aloo-peas-pitta",
+    "name": "Saag Aloo With Peas And Pitta",
+    "description": "Plant-based saag aloo with peas, spinach, spiced potatoes, and wholemeal pittas.",
+    "time": 20,
+    "servings": 2,
+    "tags": [
+      "Plant-based",
+      "Dairy-free",
+      "10-minute meal"
+    ],
+    "ingredients": [
+      {
+        "name": "Blanched peas",
+        "quantity": 240,
+        "unit": "g",
+        "category": "Produce"
+      },
+      {
+        "name": "Cumin seeds",
+        "quantity": 1.5,
+        "unit": "tsp",
+        "category": "Pantry"
+      },
+      {
+        "name": "Curry powder",
+        "quantity": 0.75,
+        "unit": "tbsp",
+        "category": "Pantry"
+      },
+      {
+        "name": "Ginger & garlic paste",
+        "quantity": 22.5,
+        "unit": "g",
+        "category": "Pantry"
+      },
+      {
+        "name": "Ground turmeric",
+        "quantity": 0.75,
+        "unit": "tsp",
+        "category": "Pantry"
+      },
+      {
+        "name": "Mango chutney",
+        "quantity": 30,
+        "unit": "g",
+        "category": "Pantry"
+      },
+      {
+        "name": "Red chilli",
+        "quantity": 1.5,
+        "unit": "",
+        "category": "Produce"
+      },
+      {
+        "name": "Solid creamed coconut",
+        "quantity": 37.5,
+        "unit": "g",
+        "category": "Pantry"
+      },
+      {
+        "name": "Spinach",
+        "quantity": 180,
+        "unit": "g",
+        "category": "Produce"
+      },
+      {
+        "name": "Toasted sesame seeds",
+        "quantity": 7.5,
+        "unit": "g",
+        "category": "Pantry"
+      },
+      {
+        "name": "Tomato paste",
+        "quantity": 24,
+        "unit": "g",
+        "category": "Pantry"
+      },
+      {
+        "name": "Vegetable stock mix",
+        "quantity": 8.25,
+        "unit": "g",
+        "category": "Pantry"
+      },
+      {
+        "name": "Waxy potatoes",
+        "quantity": 525,
+        "unit": "g",
+        "category": "Produce"
+      },
+      {
+        "name": "Wholemeal pittas",
+        "quantity": 3,
+        "unit": "",
+        "category": "Pantry"
+      }
+    ]
+  },
+  {
+    "id": "saucy-onion-gravy-beef-meatballs",
+    "name": "Saucy Onion Gravy Beef Meatballs & Crushed Potatoes",
+    "description": "Beef meatballs with onion gravy, crushed potatoes, and tenderstem broccoli.",
+    "time": 23,
+    "servings": 2,
+    "tags": [
+      "Gluten-free",
+      "Dairy-free"
+    ],
+    "ingredients": [
+      {
+        "name": "Beef mince",
+        "quantity": 375,
+        "unit": "g",
+        "category": "Protein"
+      },
+      {
+        "name": "Brown onion",
+        "quantity": 2,
+        "unit": "",
+        "category": "Produce"
+      },
+      {
+        "name": "Cornflour",
+        "quantity": 1.5,
+        "unit": "tbsp",
+        "category": "Pantry"
+      },
+      {
+        "name": "Garlic clove",
+        "quantity": 2,
+        "unit": "",
+        "category": "Produce"
+      },
+      {
+        "name": "Gravy base",
+        "quantity": 21,
+        "unit": "g",
+        "category": "Pantry"
+      },
+      {
+        "name": "Onion marmalade",
+        "quantity": 30,
+        "unit": "g",
+        "category": "Pantry"
+      },
+      {
+        "name": "Tenderstem broccoli",
+        "quantity": 240,
+        "unit": "g",
+        "category": "Produce"
+      },
+      {
+        "name": "Tomato paste",
+        "quantity": 24,
+        "unit": "g",
+        "category": "Pantry"
+      },
+      {
+        "name": "White potato",
+        "quantity": 5,
+        "unit": "",
+        "category": "Produce"
+      }
     ]
   },
   {
@@ -245,15 +880,53 @@
     "description": "Creamy truffle cacio e pepe sauce with spinach and ricotta ravioli, mushrooms, and Italian hard cheese.",
     "time": 15,
     "servings": 2,
-    "tags": ["Vegetarian", "10-minute meal"],
+    "tags": [
+      "Vegetarian",
+      "10-minute meal"
+    ],
     "ingredients": [
-      { "name": "Cornish clotted cream", "quantity": 60, "unit": "g", "category": "Dairy" },
-      { "name": "Cracked black pepper", "quantity": 3.75, "unit": "g", "category": "Pantry" },
-      { "name": "Grated Italian hard cheese", "quantity": 90, "unit": "g", "category": "Dairy" },
-      { "name": "Spinach & ricotta ravioli", "quantity": 375, "unit": "g", "category": "Pantry" },
-      { "name": "Truffle flavour extra virgin olive oil", "quantity": 12, "unit": "ml", "category": "Pantry" },
-      { "name": "Vegetable stock mix", "quantity": 8.25, "unit": "g", "category": "Pantry" },
-      { "name": "White cup mushrooms", "quantity": 240, "unit": "g", "category": "Produce" }
+      {
+        "name": "Cornish clotted cream",
+        "quantity": 60,
+        "unit": "g",
+        "category": "Dairy"
+      },
+      {
+        "name": "Cracked black pepper",
+        "quantity": 3.75,
+        "unit": "g",
+        "category": "Pantry"
+      },
+      {
+        "name": "Grated Italian hard cheese",
+        "quantity": 90,
+        "unit": "g",
+        "category": "Dairy"
+      },
+      {
+        "name": "Spinach & ricotta ravioli",
+        "quantity": 375,
+        "unit": "g",
+        "category": "Pantry"
+      },
+      {
+        "name": "Truffle flavour extra virgin olive oil",
+        "quantity": 12,
+        "unit": "ml",
+        "category": "Pantry"
+      },
+      {
+        "name": "Vegetable stock mix",
+        "quantity": 8.25,
+        "unit": "g",
+        "category": "Pantry"
+      },
+      {
+        "name": "White cup mushrooms",
+        "quantity": 240,
+        "unit": "g",
+        "category": "Produce"
+      }
     ]
   }
 ]
