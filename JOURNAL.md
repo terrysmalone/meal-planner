@@ -123,3 +123,7 @@ Added live My recipes search filtering across names, descriptions, tags, ingredi
 ## 16:29 UTC
 
 Preserved the existing mobile footer spacing while finalizing the responsive search layout.
+
+## 16:30 UTC
+
+Changed Weekly plan to show only recipes selected for the week. Added an empty state directing users to My recipes when no meals are chosen; the shopping list was already selection-based.

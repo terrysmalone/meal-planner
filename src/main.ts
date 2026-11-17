@@ -308,8 +308,12 @@ const render = () => {
             })()
           : `<div class="content-grid">
               <section>
-                <div class="section-header"><div><div class="eyebrow">STEP 1</div><h2>Pick your meals</h2></div><button class="text-button" data-view="recipes">See all recipes →</button></div>
-                <div class="recipe-grid">${recipes.map(renderRecipeCard).join('')}</div>
+                <div class="section-header"><div><div class="eyebrow">YOUR WEEK</div><h2>Chosen meals</h2></div><button class="text-button" data-view="recipes">Add recipes →</button></div>
+                ${
+                  plannedRecipes.length
+                    ? `<div class="recipe-grid">${plannedRecipes.map(({ recipeId }) => getRecipe(recipeId)).filter((recipe): recipe is Recipe => Boolean(recipe)).map(renderRecipeCard).join('')}</div>`
+                    : '<div class="empty-state recipe-no-results"><span class="empty-icon">✦</span><h3>No meals chosen</h3><p>Visit My recipes to add meals to your week.</p></div>'
+                }
               </section>
               <aside class="shopping-panel">
                 <div class="panel-header"><div><div class="eyebrow">STEP 2</div><h2>Shopping list</h2></div><button class="print-button" onclick="window.print()">Print</button></div>
