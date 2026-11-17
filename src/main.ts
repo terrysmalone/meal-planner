@@ -1,11 +1,22 @@
 import { createWorker, PSM } from 'tesseract.js'
 import './style.css'
-import { deleteRecipe, initializeRecipes, listRecipes, saveRecipe } from './recipe-store'
+import { deleteRecipe, initializeRecipes, listRecipes, replaceRecipes, saveRecipe } from './recipe-store'
 import type { Category, Ingredient, Recipe } from './recipe-store'
 
 type PlannedRecipe = {
   recipeId: string
   servings: number
+}
+
+type RecipeFileHandle = {
+  createWritable: () => Promise<{ write: (contents: string) => Promise<void>; close: () => Promise<void> }>
+}
+
+type SaveFilePickerWindow = Window & {
+  showSaveFilePicker?: (options: {
+    suggestedName: string
+    types: Array<{ description: string; accept: Record<string, string[]> }>
+  }) => Promise<RecipeFileHandle>
 }
 
 const storageKey = 'meal-planner-plan'
@@ -21,6 +32,77 @@ let selectedRecipeImage: File | undefined
 const app = document.querySelector<HTMLDivElement>('#app')!
 
 const savePlan = () => localStorage.setItem(storageKey, JSON.stringify(plannedRecipes))
+
+const exportRecipeBackup = async () => {
+  const contents = JSON.stringify(recipes, null, 2)
+  const pickerWindow = window as SaveFilePickerWindow
+  if (pickerWindow.showSaveFilePicker) {
+    try {
+      const handle = await pickerWindow.showSaveFilePicker({
+        suggestedName: 'recipes.json',
+        types: [{ description: 'JSON files', accept: { 'application/json': ['.json'] } }],
+      })
+      const writable = await handle.createWritable()
+      await writable.write(contents)
+      await writable.close()
+      return
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') return
+      window.alert(error instanceof Error ? error.message : 'Unable to save the recipe backup.')
+      return
+    }
+  }
+  const file = new Blob([contents], { type: 'application/json' })
+  const url = URL.createObjectURL(file)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = 'recipes.json'
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
+const isRecipeBackup = (value: unknown): value is Recipe[] => {
+  if (!Array.isArray(value) || new Set(value.map((item) => (item as { id?: unknown }).id)).size !== value.length) return false
+  return value.every((item) => {
+    if (!item || typeof item !== 'object') return false
+    const recipe = item as Partial<Recipe>
+    return (
+      typeof recipe.id === 'string' &&
+      typeof recipe.name === 'string' &&
+      typeof recipe.description === 'string' &&
+      typeof recipe.time === 'number' &&
+      typeof recipe.servings === 'number' &&
+      Array.isArray(recipe.tags) &&
+      recipe.tags.every((tag) => typeof tag === 'string') &&
+      Array.isArray(recipe.ingredients) &&
+      recipe.ingredients.every((ingredient) => {
+        if (!ingredient || typeof ingredient !== 'object') return false
+        const value = ingredient as Partial<Ingredient>
+        return (
+          typeof value.name === 'string' &&
+          typeof value.quantity === 'number' &&
+          typeof value.unit === 'string' &&
+          ['Produce', 'Protein', 'Dairy', 'Pantry'].includes(value.category ?? '')
+        )
+      })
+    )
+  })
+}
+
+const importRecipeBackup = async (file: File) => {
+  try {
+    const data: unknown = JSON.parse(await file.text())
+    if (!isRecipeBackup(data)) throw new Error('This file is not a valid recipes.json backup.')
+    await replaceRecipes(data)
+    recipes = data
+    const recipeIds = new Set(recipes.map((recipe) => recipe.id))
+    plannedRecipes = plannedRecipes.filter((item) => recipeIds.has(item.recipeId))
+    savePlan()
+    render()
+  } catch (error) {
+    window.alert(error instanceof Error ? error.message : 'Unable to import this backup.')
+  }
+}
 
 const formatQuantity = (quantity: number) =>
   Number.isInteger(quantity) ? String(quantity) : quantity.toFixed(1).replace('.0', '')
@@ -223,14 +305,14 @@ const render = () => {
       <section class="hero">
         <div>
           <div class="eyebrow">WEEK OF ${nextWeekLabel().toUpperCase()}</div>
-          <h1>Give someone a fish and they'll eat for a day.<br><i>Teach them how to fish and they'll eat for life.</i></h1>
+          <h1>Give a man a fish and he'll eat for a day.<br><i>Teach him how to fish and he'll eat for life.</i></h1>
           <p>Choose your meals for the week and we’ll take care of the shopping list.</p>
         </div>
         <div class="week-summary"><span class="summary-label">THIS WEEK</span><strong>${plannedRecipes.length} <small>meals</small></strong><span>${totalServings} servings planned</span></div>
       </section>
       ${
         activeView === 'recipes'
-          ? `<section class="section-header"><div><div class="eyebrow">YOUR COLLECTION</div><h2>Recipes to cook</h2></div><button class="outline-button" data-new-recipe>＋ New recipe</button></section>
+          ? `<section class="section-header"><div><div class="eyebrow">YOUR COLLECTION</div><h2>Recipes to cook</h2></div><div class="section-actions"><button class="text-button" data-export-recipes>Export backup</button><label class="text-button backup-import">Import backup<input id="recipe-backup" type="file" accept=".json,application/json"></label><button class="outline-button" data-new-recipe>＋ New recipe</button></div></section>
              <section class="recipe-grid">${recipes.map(renderRecipeCard).join('')}</section>`
           : `<div class="content-grid">
               <section>
@@ -348,6 +430,13 @@ const bindEvents = () => {
       editingRecipeId = null
       selectedRecipeImage = undefined
       render()
+    })
+    document.querySelectorAll<HTMLElement>('[data-export-recipes]').forEach((button) => {
+      button.addEventListener('click', exportRecipeBackup)
+    })
+    document.querySelector<HTMLInputElement>('#recipe-backup')?.addEventListener('change', (event) => {
+      const file = (event.target as HTMLInputElement).files?.[0]
+      if (file) void importRecipeBackup(file)
     })
   })
   document.querySelectorAll<HTMLElement>('[data-view-recipe]').forEach((button) => {

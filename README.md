@@ -11,6 +11,8 @@ npm run dev
 
 The app currently stores the selected weekly plan in `localStorage`, so no server or account is required.
 
+Recipe data is stored in IndexedDB. Use **Export backup** on the My recipes page; in Chrome, choose the repository's `src/data/recipes.json` in the save dialog to update it directly. Browsers without the File System Access API download `recipes.json` instead. Use **Import backup** to replace the current collection from a valid backup file.
+
 ## Current foundation
 
 - Sample recipe collection with structured ingredients

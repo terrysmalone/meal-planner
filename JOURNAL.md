@@ -71,3 +71,15 @@ Changed the weekly-plan heading from a hardcoded date range to a dynamic range f
 ## 15:49 UTC
 
 Added recipe editing with prefilled fields, edit actions on recipe cards and recipe details, and IndexedDB updates that preserve existing recipe IDs and weekly-plan references.
+
+## 15:54 UTC
+
+Added `src/data/recipes.json` as a versioned recipe backup, an Export backup action for the live IndexedDB collection, and README instructions for copying the exported file back into the repository.
+
+## 15:55 UTC
+
+Added Replace from backup importing for `recipes.json`. The importer validates the file, replaces the IndexedDB collection, and removes weekly-plan references to recipes absent from the backup.
+
+## 15:58 UTC
+
+Updated Export backup to use Chrome’s File System Access API when available, allowing the user to select and overwrite `src/data/recipes.json` directly. Download fallback remains for unsupported browsers.

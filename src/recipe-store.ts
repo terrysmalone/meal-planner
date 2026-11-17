@@ -136,6 +136,18 @@ export const deleteRecipe = async (id: string) => {
   })
 }
 
+export const replaceRecipes = async (recipes: Recipe[]) => {
+  const database = await openDatabase()
+  const transaction = database.transaction(recipeStoreName, 'readwrite')
+  const store = transaction.objectStore(recipeStoreName)
+  store.clear()
+  recipes.forEach((recipe) => store.put(recipe))
+  await new Promise<void>((resolve, reject) => {
+    transaction.onerror = () => reject(transaction.error ?? new Error('Unable to import the recipes.'))
+    transaction.oncomplete = () => resolve()
+  })
+}
+
 export const initializeRecipes = async () => {
   const database = await openDatabase()
   const transaction = database.transaction(recipeStoreName, 'readwrite')

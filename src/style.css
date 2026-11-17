@@ -27,6 +27,9 @@ h1 i { color: #799b75; font-family: 'Playfair Display', serif; font-weight: 600;
 .week-summary small { color: #94a097; font-size: 13px; font-weight: 500; }
 .content-grid { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 52px; }
 .section-header, .panel-header { display: flex; justify-content: space-between; align-items: end; margin-bottom: 22px; }
+.section-actions { display: flex; align-items: center; gap: 18px; }
+.backup-import { cursor: pointer; }
+.backup-import input { display: none; }
 h2 { color: #2d4336; font-size: 26px; letter-spacing: -1px; margin-top: 8px; }
 .text-button, .outline-button { color: #71946f; background: none; border: 0; font-size: 12px; font-weight: 700; }
 .outline-button { border: 1px solid #b5c6b0; border-radius: 5px; padding: 10px 15px; }
