@@ -23,3 +23,11 @@ Replaced the hero message with the two-sentence fish proverb, preserving the exi
 ## 15:18 UTC
 
 Reduced the responsive hero heading size so the fish proverb takes up less space while retaining its existing styling.
+
+## 15:25 UTC
+
+Added an IndexedDB recipe database with the existing recipes plus the pictured Peri Peri Halloumi recipe as seed data. Added a recipe-card image import form using browser OCR, editable review fields, ingredient parsing, and recipe saving. Added `tesseract.js` and the recipe form styles; the weekly plan remains in local storage.
+
+## 15:28 UTC
+
+Removed the four original sample recipes, leaving only the Peri Peri Fried Rice recipe as starter data. Existing IndexedDB users are cleaned up automatically, along with stale weekly-plan references.
