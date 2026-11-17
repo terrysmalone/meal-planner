@@ -139,3 +139,43 @@ Adjusted database initialization to insert each missing starter recipe individua
 ## 16:35 UTC
 
 Added an explicit IndexedDB store guard in the portion migration after the type-check identified the upgrade transaction as potentially unavailable.
+
+## 16:39 UTC
+
+Added the Cheesy Mexican-Style Rice With Crème Fraîche recipe from the supplied card with ingredient quantities increased by 50%. Added it to the repository backup and IndexedDB schema migration.
+
+## 16:42 UTC
+
+Added the Saucy Onion Gravy Beef Meatballs & Crushed Potatoes recipe from the supplied card with ingredient quantities increased by 50%. Added it to the repository backup and IndexedDB schema migration.
+
+## 16:40 UTC
+
+Added the Hoisin Chicken & Rice recipe from the supplied card with ingredient quantities increased by 50%. Added it to the repository backup and IndexedDB schema migration.
+
+## 16:42 UTC
+
+Added the Chicken & Butternut Squash Korma With Rice And Naan recipe from the supplied card with ingredient quantities increased by 50%. Added it to the repository backup and IndexedDB schema migration.
+
+## 16:45 UTC
+
+Added the Saag Aloo With Peas And Pitta recipe from the supplied card with ingredient quantities increased by 50%. Added it to the repository backup and IndexedDB schema migration.
+
+## 16:46 UTC
+
+Added the Beef & Mushroom Bolognese With Wholewheat Tortiglioni recipe from the supplied card with ingredient quantities increased by 50%. Added it to the repository backup and IndexedDB schema migration.
+
+## 16:47 UTC
+
+Added the Battered Basa With Salt & Vinegar Chips And Mushy Peas recipe from the supplied card with ingredient quantities increased by 50%. Added it to the repository backup and IndexedDB schema migration.
+
+## 16:48 UTC
+
+Added the Herby Chicken With Creamy Leek Sauce And Buttery Mash recipe from the supplied card with ingredient quantities increased by 50%. Added it to the repository backup and IndexedDB schema migration.
+
+## 16:49 UTC
+
+Added the Cheesy Black Bean Enchiladas recipe from the supplied card with ingredient quantities increased by 50%. Added it to the repository backup and IndexedDB schema migration.
+
+## 16:50 UTC
+
+Added the Truffle Cacio E Pepe Sauce With Spinach & Ricotta Ravioli recipe from the supplied card with ingredient quantities increased by 50%. Added it to the repository backup and IndexedDB schema migration.
