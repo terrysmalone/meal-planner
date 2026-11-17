@@ -111,3 +111,7 @@ Fixed the shared account and backup event listeners being nested under the My re
 ## 16:20 UTC
 
 Removed the broken global search button from the site header in preparation for targeted search controls.
+
+## 16:22 UTC
+
+Removed the recipe-card file picker, OCR workflow, image preprocessing, and Tesseract dependency. New recipes are now entered manually through the recipe form.

@@ -81,10 +81,6 @@ h2 { color: #2d4336; font-size: 26px; letter-spacing: -1px; margin-top: 8px; }
 #recipe-form textarea { resize: vertical; line-height: 1.5; }
 .upload-field { border: 1px dashed #b5c6b0; border-radius: 5px; padding: 12px; background: #f7faf5; }
 .upload-field input { border: 0 !important; padding: 0 !important; background: transparent !important; }
-.upload-row { display: flex; align-items: end; gap: 12px; }
-.upload-row .upload-field { flex: 1; }
-.upload-row > .outline-button { white-space: nowrap; }
-.upload-row > .outline-button:disabled { cursor: not-allowed; opacity: .5; }
 .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .form-grid label:nth-child(2), .form-grid label:nth-child(5) { grid-column: 1 / -1; }
 .field-help { color: #9aa39c; font-weight: 400; }
@@ -97,5 +93,5 @@ h2 { color: #2d4336; font-size: 26px; letter-spacing: -1px; margin-top: 8px; }
 .ingredient-list strong { color: #8d9a90; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
 footer { border-top: 1px solid #e6e9e1; color: #a2aaa3; display: flex; justify-content: space-between; padding: 22px max(28px, calc((100vw - 1200px) / 2)); font-size: 11px; }
 @media (max-width: 800px) { .topbar { gap: 25px; } .hero { display: block; } .week-summary { margin-top: 30px; } .content-grid { grid-template-columns: 1fr; } }
-@media (max-width: 520px) { nav { gap: 12px; } .recipe-grid { grid-template-columns: 1fr; } main { padding: 42px 18px; } footer { padding: 18px; display: block; } footer span { display: block; margin: 4px 0; } .recipe-modal { padding: 20px; } .form-grid { grid-template-columns: 1fr; } .form-grid label:nth-child(2), .form-grid label:nth-child(5) { grid-column: auto; } .upload-row { align-items: stretch; flex-direction: column; } }
+@media (max-width: 520px) { nav { gap: 12px; } .recipe-grid { grid-template-columns: 1fr; } main { padding: 42px 18px; } footer { padding: 18px; display: block; } footer span { display: block; margin: 4px 0; } .recipe-modal { padding: 20px; } .form-grid { grid-template-columns: 1fr; } .form-grid label:nth-child(2), .form-grid label:nth-child(5) { grid-column: auto; } }
 @media print { .topbar, .hero, .section-header, footer, .recipe-grid { display: none; } main { padding: 0; } .content-grid { display: block; } .shopping-panel { border: 0; } }

@@ -1,4 +1,3 @@
-import { createWorker, PSM } from 'tesseract.js'
 import './style.css'
 import { deleteRecipe, initializeRecipes, listRecipes, replaceRecipes, saveRecipe } from './recipe-store'
 import type { Category, Ingredient, Recipe } from './recipe-store'
@@ -27,7 +26,6 @@ let activeView: 'plan' | 'recipes' = 'plan'
 let isRecipeFormOpen = false
 let viewingRecipeId: string | null = null
 let editingRecipeId: string | null = null
-let selectedRecipeImage: File | undefined
 let isAccountMenuOpen = false
 
 const app = document.querySelector<HTMLDivElement>('#app')!
@@ -167,27 +165,6 @@ const categoryForIngredient = (name: string): Category => {
   return 'Produce'
 }
 
-const parseOcrIngredients = (text: string): Ingredient[] => {
-  const lines = text
-    .split(/\r?\n/)
-    .map((line) => line.replace(/[•|]/g, ' ').replace(/\s+/g, ' ').trim())
-    .filter(Boolean)
-  const start = lines.findIndex((line) => /ingredients/i.test(line))
-  const end = lines.findIndex((line, index) => index > start && /before you start/i.test(line))
-  const ingredientLines = lines.slice(start + 1, end > start ? end : start + 10)
-  return ingredientLines.flatMap((line) => {
-    if (/^x\d|ingredients/i.test(line)) return []
-    const match =
-      line.match(/^(\d+(?:[.,]\d+)?)\s*(g|kg|ml|l|tbsp|tsp|cans?)?\s+(.+)$/i) ??
-      line.match(/^(.+?)\s+(\d+(?:[.,]\d+)?)\s*(g|kg|ml|l|tbsp|tsp|cans?)?$/i)
-    if (!match) return []
-    const quantity = Number((match[1].match(/\d/) ? match[1] : match[2]).replace(',', '.'))
-    const unit = (match[1].match(/\d/) ? match[2] : match[3]) ?? ''
-    const name = (match[1].match(/\d/) ? match[3] : match[1]).replace(/\s+A\d+(?:,\s*A\d+)*$/i, '').trim()
-    return [{ name, quantity, unit, category: categoryForIngredient(name) }]
-  })
-}
-
 const parseFormIngredients = (value: string): Ingredient[] =>
   value
     .split(/\r?\n/)
@@ -203,13 +180,11 @@ const recipeForm = (recipe?: Recipe) => `
   <div class="modal-backdrop" data-close-modal>
     <section class="recipe-modal" role="dialog" aria-modal="true" aria-labelledby="recipe-modal-title">
       <div class="modal-header">
-        <div><div class="eyebrow">RECIPE CARD IMPORT</div><h2 id="recipe-modal-title">${recipe ? 'Edit recipe' : 'Add a recipe'}</h2></div>
+        <div><div class="eyebrow">RECIPE DETAILS</div><h2 id="recipe-modal-title">${recipe ? 'Edit recipe' : 'Add a recipe'}</h2></div>
         <button class="icon-button" type="button" aria-label="Close" data-close-modal>×</button>
       </div>
-      <p class="modal-intro">${recipe ? 'Update the recipe details below.' : 'Upload a recipe card to extract its text, then review the fields before saving.'}</p>
+      <p class="modal-intro">${recipe ? 'Update the recipe details below.' : 'Enter the recipe details below.'}</p>
       <form id="recipe-form">
-        ${recipe ? '' : '<div class="upload-row"><label class="upload-field">Recipe card image<input id="recipe-image" type="file" accept="image/*"></label><button type="button" class="outline-button" data-run-ocr disabled>Read card</button></div>'}
-        <p id="ocr-status" class="form-status" aria-live="polite">Choose an image, then select “Read card”.</p>
         <div class="form-grid">
           <label>Name<input name="name" value="${escapeHtml(recipe?.name ?? '')}" required></label>
           <label>Description<input name="description" value="${escapeHtml(recipe?.description ?? '')}" required></label>
@@ -335,76 +310,6 @@ const render = () => {
   bindEvents()
 }
 
-const fillFormFromOcr = (text: string) => {
-  const form = document.querySelector<HTMLFormElement>('#recipe-form')
-  if (!form) return
-  const lines = text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
-  const title = lines.find((line) => /fried rice|chicken|pasta|curry|salmon|halloumi/i.test(line))
-  const name = form.elements.namedItem('name') as HTMLInputElement
-  const description = form.elements.namedItem('description') as HTMLInputElement
-  const ingredients = form.elements.namedItem('ingredients') as HTMLTextAreaElement
-  if (title) name.value = title.replace(/\s+/g, ' ').replace(/\s+\(V\)$/i, '')
-  if (title) description.value = `${title.replace(/\s+\(V\)$/i, '')}.`
-  const parsedIngredients = parseOcrIngredients(text)
-  if (parsedIngredients.length) {
-    ingredients.value = parsedIngredients.map((item) => `${item.quantity} | ${item.unit} | ${item.name} | ${item.category}`).join('\n')
-  }
-}
-
-const resizeImageForOcr = async (file: File) => {
-  const image = new Image()
-  const url = URL.createObjectURL(file)
-  try {
-    await new Promise<void>((resolve, reject) => {
-      image.onload = () => resolve()
-      image.onerror = () => reject(new Error('Unable to load this image.'))
-      image.src = url
-    })
-    const scale = Math.min(2.4, 2400 / Math.max(image.naturalWidth, image.naturalHeight))
-    const canvas = document.createElement('canvas')
-    canvas.width = Math.max(1, Math.round(image.naturalWidth * scale))
-    canvas.height = Math.max(1, Math.round(image.naturalHeight * scale))
-    const context = canvas.getContext('2d')!
-    context.drawImage(image, 0, 0, canvas.width, canvas.height)
-    const pixels = context.getImageData(0, 0, canvas.width, canvas.height)
-    for (let index = 0; index < pixels.data.length; index += 4) {
-      const luminance = pixels.data[index] * 0.299 + pixels.data[index + 1] * 0.587 + pixels.data[index + 2] * 0.114
-      const contrast = Math.max(0, Math.min(255, (luminance - 128) * 1.45 + 128))
-      pixels.data[index] = contrast
-      pixels.data[index + 1] = contrast
-      pixels.data[index + 2] = contrast
-    }
-    context.putImageData(pixels, 0, 0)
-    return await new Promise<Blob>((resolve, reject) => {
-      canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('Unable to prepare this image.'))), 'image/jpeg', 0.85)
-    })
-  } finally {
-    URL.revokeObjectURL(url)
-  }
-}
-
-const runOcr = async (file: File, button: HTMLButtonElement) => {
-  const status = document.querySelector<HTMLParagraphElement>('#ocr-status')
-  if (!status) return
-  button.disabled = true
-  status.textContent = 'Preparing the image…'
-  let worker: Awaited<ReturnType<typeof createWorker>> | undefined
-  try {
-    const image = await resizeImageForOcr(file)
-    status.textContent = 'Reading the recipe card…'
-    worker = await createWorker('eng')
-    await worker.setParameters({ tessedit_pageseg_mode: PSM.AUTO, preserve_interword_spaces: '1', user_defined_dpi: '300' })
-    const result = await worker.recognize(image, { rotateAuto: true })
-    fillFormFromOcr(result.data.text)
-    status.textContent = 'Text extracted with enhanced image processing. Review the fields before saving.'
-  } catch (error) {
-    status.textContent = error instanceof Error ? error.message : 'Unable to read this image.'
-  } finally {
-    await worker?.terminate()
-    button.disabled = false
-  }
-}
-
 const bindEvents = () => {
   document.querySelectorAll<HTMLElement>('[data-view]').forEach((button) => {
     button.addEventListener('click', () => {
@@ -429,7 +334,6 @@ const bindEvents = () => {
     button.addEventListener('click', () => {
       isRecipeFormOpen = true
       editingRecipeId = null
-      selectedRecipeImage = undefined
       render()
     })
   })
@@ -457,7 +361,6 @@ const bindEvents = () => {
           editingRecipeId = button.dataset.editRecipe!
           viewingRecipeId = null
           isRecipeFormOpen = true
-          selectedRecipeImage = undefined
           render()
         })
       })
@@ -489,16 +392,6 @@ const bindEvents = () => {
       editingRecipeId = null
       render()
     })
-  })
-  document.querySelector<HTMLInputElement>('#recipe-image')?.addEventListener('change', (event) => {
-    selectedRecipeImage = (event.target as HTMLInputElement).files?.[0]
-    const button = document.querySelector<HTMLButtonElement>('[data-run-ocr]')
-    if (button) button.disabled = !selectedRecipeImage
-    const status = document.querySelector<HTMLParagraphElement>('#ocr-status')
-    if (status && selectedRecipeImage) status.textContent = 'Image selected. Select “Read card” when ready.'
-  })
-  document.querySelector<HTMLButtonElement>('[data-run-ocr]')?.addEventListener('click', (event) => {
-    if (selectedRecipeImage) void runOcr(selectedRecipeImage, event.currentTarget as HTMLButtonElement)
   })
   document.querySelector<HTMLFormElement>('#recipe-form')?.addEventListener('submit', async (event) => {
     event.preventDefault()
