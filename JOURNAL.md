@@ -191,3 +191,7 @@ Alphabetised ingredients within each shopping-list category.
 ## 16:57 UTC
 
 Added shopping-list validation for ingredients that share a name but use different measurement units. The weekly plan now lists the conflicting units and affected recipes with edit links, and adding or editing a recipe prompts before saving a new unit mismatch so it can be corrected.
+
+## 17:01 UTC
+
+Rounded all fractional quantities for unitless ingredients up to whole numbers, including onions, potatoes, garlic, leeks, lemons, carrots, and chillies. Measured quantities were left unchanged, and an IndexedDB migration updates existing recipes.

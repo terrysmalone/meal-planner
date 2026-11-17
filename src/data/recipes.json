@@ -24,7 +24,7 @@
       },
       {
         "name": "Lemon",
-        "quantity": 1.5,
+        "quantity": 2,
         "unit": "",
         "category": "Produce"
       },
@@ -60,7 +60,7 @@
       },
       {
         "name": "White potato",
-        "quantity": 4.5,
+        "quantity": 5,
         "unit": "",
         "category": "Produce"
       }
@@ -90,13 +90,13 @@
       },
       {
         "name": "Brown onion",
-        "quantity": 1.5,
+        "quantity": 2,
         "unit": "",
         "category": "Produce"
       },
       {
         "name": "Carrot",
-        "quantity": 1.5,
+        "quantity": 2,
         "unit": "",
         "category": "Produce"
       },
@@ -193,7 +193,7 @@
       },
       {
         "name": "Red onion",
-        "quantity": 1.5,
+        "quantity": 2,
         "unit": "",
         "category": "Produce"
       },
@@ -484,13 +484,13 @@
       },
       {
         "name": "Garlic clove",
-        "quantity": 1.5,
+        "quantity": 2,
         "unit": "",
         "category": "Produce"
       },
       {
         "name": "Leek",
-        "quantity": 1.5,
+        "quantity": 2,
         "unit": "",
         "category": "Produce"
       },
@@ -759,7 +759,7 @@
       },
       {
         "name": "Red chilli",
-        "quantity": 1.5,
+        "quantity": 2,
         "unit": "",
         "category": "Produce"
       },

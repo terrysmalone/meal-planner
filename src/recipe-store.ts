@@ -18,7 +18,7 @@ export type Recipe = {
 }
 
 const databaseName = 'operation-fish-for-life'
-const databaseVersion = 14
+const databaseVersion = 15
 const recipeStoreName = 'recipes'
 
 const chickenFajitaTrayBake: Recipe = {
@@ -160,7 +160,7 @@ const saagAlooPeas: Recipe = {
     { name: 'Ginger & garlic paste', quantity: 22.5, unit: 'g', category: 'Pantry' },
     { name: 'Ground turmeric', quantity: 0.75, unit: 'tsp', category: 'Pantry' },
     { name: 'Mango chutney', quantity: 30, unit: 'g', category: 'Pantry' },
-    { name: 'Red chilli', quantity: 1.5, unit: '', category: 'Produce' },
+    { name: 'Red chilli', quantity: 2, unit: '', category: 'Produce' },
     { name: 'Solid creamed coconut', quantity: 37.5, unit: 'g', category: 'Pantry' },
     { name: 'Spinach', quantity: 180, unit: 'g', category: 'Produce' },
     { name: 'Toasted sesame seeds', quantity: 7.5, unit: 'g', category: 'Pantry' },
@@ -181,8 +181,8 @@ const beefMushroomBolognese: Recipe = {
   ingredients: [
     { name: 'Beef mince', quantity: 187.5, unit: 'g', category: 'Protein' },
     { name: 'Beef stock mix (intense)', quantity: 8.25, unit: 'g', category: 'Pantry' },
-    { name: 'Brown onion', quantity: 1.5, unit: '', category: 'Produce' },
-    { name: 'Carrot', quantity: 1.5, unit: '', category: 'Produce' },
+    { name: 'Brown onion', quantity: 2, unit: '', category: 'Produce' },
+    { name: 'Carrot', quantity: 2, unit: '', category: 'Produce' },
     { name: 'Chestnut mushrooms', quantity: 240, unit: 'g', category: 'Produce' },
     { name: 'Dried oregano', quantity: 1.5, unit: 'tsp', category: 'Pantry' },
     { name: 'Finely chopped tomatoes', quantity: 300, unit: 'g', category: 'Produce' },
@@ -203,13 +203,13 @@ const batteredBasaChipsPeas: Recipe = {
   ingredients: [
     { name: 'Basa fillets', quantity: 3, unit: '', category: 'Protein' },
     { name: 'Blanched peas', quantity: 240, unit: 'g', category: 'Produce' },
-    { name: 'Lemon', quantity: 1.5, unit: '', category: 'Produce' },
+    { name: 'Lemon', quantity: 2, unit: '', category: 'Produce' },
     { name: 'Marmite', quantity: 12, unit: 'g', category: 'Pantry' },
     { name: 'Mayonnaise', quantity: 75, unit: 'ml', category: 'Pantry' },
     { name: 'Red wine vinegar', quantity: 45, unit: 'ml', category: 'Pantry' },
     { name: 'Shallot', quantity: 3, unit: '', category: 'Produce' },
     { name: 'Tomato ketchup', quantity: 45, unit: 'ml', category: 'Pantry' },
-    { name: 'White potato', quantity: 4.5, unit: '', category: 'Produce' },
+    { name: 'White potato', quantity: 5, unit: '', category: 'Produce' },
   ],
 }
 
@@ -227,8 +227,8 @@ const herbyChickenLeekMash: Recipe = {
     { name: 'Crème fraîche', quantity: 120, unit: 'g', category: 'Dairy' },
     { name: 'Dijon mustard', quantity: 8.25, unit: 'g', category: 'Pantry' },
     { name: 'Dried thyme', quantity: 0.75, unit: 'tsp', category: 'Pantry' },
-    { name: 'Garlic clove', quantity: 1.5, unit: '', category: 'Produce' },
-    { name: 'Leek', quantity: 1.5, unit: '', category: 'Produce' },
+    { name: 'Garlic clove', quantity: 2, unit: '', category: 'Produce' },
+    { name: 'Leek', quantity: 2, unit: '', category: 'Produce' },
     { name: 'White potato', quantity: 6, unit: '', category: 'Produce' },
   ],
 }
@@ -247,7 +247,7 @@ const cheesyBlackBeanEnchiladas: Recipe = {
     { name: 'Ground cumin', quantity: 1.5, unit: 'tsp', category: 'Pantry' },
     { name: 'Ground smoked paprika', quantity: 3, unit: 'tsp', category: 'Pantry' },
     { name: 'Plain tortillas', quantity: 9, unit: '', category: 'Pantry' },
-    { name: 'Red onion', quantity: 1.5, unit: '', category: 'Produce' },
+    { name: 'Red onion', quantity: 2, unit: '', category: 'Produce' },
     { name: 'Spinach', quantity: 120, unit: 'g', category: 'Produce' },
     { name: 'Tomato paste', quantity: 24, unit: 'g', category: 'Pantry' },
     { name: 'Vegetable stock mix (intense)', quantity: 8.25, unit: 'g', category: 'Pantry' },
@@ -345,6 +345,21 @@ const openDatabase = () => {
       if (event.oldVersion < 12) request.transaction?.objectStore(recipeStoreName).put(herbyChickenLeekMash)
       if (event.oldVersion < 13) request.transaction?.objectStore(recipeStoreName).put(cheesyBlackBeanEnchiladas)
       if (event.oldVersion < 14) request.transaction?.objectStore(recipeStoreName).put(truffleCacioPepeRavioli)
+      if (event.oldVersion < 15) {
+        const store = request.transaction?.objectStore(recipeStoreName)
+        const recipesRequest = store?.getAll()
+        recipesRequest?.addEventListener('success', () => {
+          recipesRequest.result.forEach((recipe: Recipe) => {
+            store?.put({
+              ...recipe,
+              ingredients: recipe.ingredients.map((ingredient) => ({
+                ...ingredient,
+                quantity: ingredient.unit ? ingredient.quantity : Math.ceil(ingredient.quantity),
+              })),
+            })
+          })
+        })
+      }
     }
   })
   return databasePromise
