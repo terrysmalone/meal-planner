@@ -1,3 +1,5 @@
+import { supabase } from './supabase'
+
 export type Category = 'Produce' | 'Protein' | 'Dairy' | 'Pantry'
 
 export type Ingredient = {
@@ -30,6 +32,11 @@ const databaseVersion = 16
 const recipeStoreName = 'recipes'
 const shoppingItemStoreName = 'shoppingItems'
 const shoppingSectionStoreName = 'shoppingSections'
+let activeHouseholdId: string | null = null
+
+export const setActiveHousehold = (householdId: string | null) => {
+  activeHouseholdId = householdId
+}
 
 const chickenFajitaTrayBake: Recipe = {
   id: 'loaded-chicken-fajita-tray-bake',
@@ -385,11 +392,57 @@ const requestResult = <T>(request: IDBRequest<T>) =>
     request.onsuccess = () => resolve(request.result)
   })
 
+const reportRemoteFailure = (operation: string, error: unknown) => {
+  console.warn(`Supabase ${operation} failed; continuing with local storage.`, error)
+}
+
+const syncRemote = async (operation: () => PromiseLike<{ error: unknown | null }>, description: string) => {
+  if (!activeHouseholdId) return
+  try {
+    const result = await operation()
+    if (result.error) reportRemoteFailure(description, result.error)
+  } catch (error) {
+    reportRemoteFailure(description, error)
+  }
+}
+
+const replaceLocalRecipes = async (recipes: Recipe[]) => {
+  const database = await openDatabase()
+  const transaction = database.transaction(recipeStoreName, 'readwrite')
+  const store = transaction.objectStore(recipeStoreName)
+  store.clear()
+  recipes.forEach((recipe) => store.put(recipe))
+  await new Promise<void>((resolve, reject) => {
+    transaction.onerror = () => reject(transaction.error ?? new Error('Unable to replace the local recipes.'))
+    transaction.oncomplete = () => resolve()
+  })
+}
+
 export const listRecipes = async () => {
   const database = await openDatabase()
   const transaction = database.transaction(recipeStoreName, 'readonly')
-  const recipes = await requestResult(transaction.objectStore(recipeStoreName).getAll())
-  return recipes.sort((first, second) => first.name.localeCompare(second.name))
+  const localRecipes = await requestResult(transaction.objectStore(recipeStoreName).getAll())
+  if (!activeHouseholdId) return localRecipes.sort((first, second) => first.name.localeCompare(second.name))
+  try {
+    const { data, error } = await supabase.from('recipes').select('id, data').eq('household_id', activeHouseholdId)
+    if (error) throw error
+    const remoteRecipes = (data ?? []).map((row) => row.data as Recipe)
+    if (!remoteRecipes.length) {
+      await syncRemote(
+        () =>
+          supabase.from('recipes').upsert(
+            localRecipes.map((recipe) => ({ household_id: activeHouseholdId, id: recipe.id, data: recipe })),
+          ),
+        'initial recipe sync',
+      )
+      return localRecipes.sort((first, second) => first.name.localeCompare(second.name))
+    }
+    await replaceLocalRecipes(remoteRecipes)
+    return remoteRecipes.sort((first, second) => first.name.localeCompare(second.name))
+  } catch (error) {
+    reportRemoteFailure('recipe loading', error)
+    return localRecipes.sort((first, second) => first.name.localeCompare(second.name))
+  }
 }
 
 export const saveRecipe = async (recipe: Recipe) => {
@@ -400,6 +453,10 @@ export const saveRecipe = async (recipe: Recipe) => {
     transaction.onerror = () => reject(transaction.error ?? new Error('Unable to save the recipe.'))
     transaction.oncomplete = () => resolve()
   })
+  await syncRemote(
+    () => supabase.from('recipes').upsert({ household_id: activeHouseholdId, id: recipe.id, data: recipe }),
+    'recipe save',
+  )
 }
 
 export const deleteRecipe = async (id: string) => {
@@ -410,24 +467,63 @@ export const deleteRecipe = async (id: string) => {
     transaction.onerror = () => reject(transaction.error ?? new Error('Unable to delete the recipe.'))
     transaction.oncomplete = () => resolve()
   })
+  await syncRemote(
+    () => supabase.from('recipes').delete().eq('household_id', activeHouseholdId).eq('id', id),
+    'recipe deletion',
+  )
 }
 
 export const replaceRecipes = async (recipes: Recipe[]) => {
-  const database = await openDatabase()
-  const transaction = database.transaction(recipeStoreName, 'readwrite')
-  const store = transaction.objectStore(recipeStoreName)
-  store.clear()
-  recipes.forEach((recipe) => store.put(recipe))
-  await new Promise<void>((resolve, reject) => {
-    transaction.onerror = () => reject(transaction.error ?? new Error('Unable to import the recipes.'))
-    transaction.oncomplete = () => resolve()
-  })
+  await replaceLocalRecipes(recipes)
+  if (activeHouseholdId) {
+    await syncRemote(
+      async () => {
+        const deleted = await supabase.from('recipes').delete().eq('household_id', activeHouseholdId)
+        if (deleted.error) return deleted
+        return supabase.from('recipes').upsert(recipes.map((recipe) => ({ household_id: activeHouseholdId, id: recipe.id, data: recipe })))
+      },
+      'recipe replacement',
+    )
+  }
 }
 
 export const listShoppingItems = async () => {
   const database = await openDatabase()
   const transaction = database.transaction(shoppingItemStoreName, 'readonly')
-  return requestResult(transaction.objectStore(shoppingItemStoreName).getAll()) as Promise<ManualShoppingItem[]>
+  const localItems = await requestResult(transaction.objectStore(shoppingItemStoreName).getAll()) as ManualShoppingItem[]
+  if (!activeHouseholdId) return localItems
+  try {
+    const { data, error } = await supabase.from('shopping_items').select('id, data').eq('household_id', activeHouseholdId)
+    if (error) throw error
+    const remoteItems = (data ?? []).map((row) => row.data as ManualShoppingItem)
+    if (!remoteItems.length) {
+      await syncRemote(
+        () =>
+          supabase.from('shopping_items').upsert(
+            localItems.map((item) => ({ household_id: activeHouseholdId, id: item.id, data: item })),
+          ),
+        'initial shopping item sync',
+      )
+      return localItems
+    }
+    await replaceLocalShoppingItems(remoteItems)
+    return remoteItems
+  } catch (error) {
+    reportRemoteFailure('shopping item loading', error)
+    return localItems
+  }
+}
+
+const replaceLocalShoppingItems = async (items: ManualShoppingItem[]) => {
+  const database = await openDatabase()
+  const transaction = database.transaction(shoppingItemStoreName, 'readwrite')
+  const store = transaction.objectStore(shoppingItemStoreName)
+  store.clear()
+  items.forEach((item) => store.put(item))
+  await new Promise<void>((resolve, reject) => {
+    transaction.onerror = () => reject(transaction.error ?? new Error('Unable to replace the local shopping items.'))
+    transaction.oncomplete = () => resolve()
+  })
 }
 
 export const saveShoppingItem = async (item: ManualShoppingItem) => {
@@ -438,6 +534,10 @@ export const saveShoppingItem = async (item: ManualShoppingItem) => {
     transaction.onerror = () => reject(transaction.error ?? new Error('Unable to save the shopping item.'))
     transaction.oncomplete = () => resolve()
   })
+  await syncRemote(
+    () => supabase.from('shopping_items').upsert({ household_id: activeHouseholdId, id: item.id, data: item }),
+    'shopping item save',
+  )
 }
 
 export const deleteShoppingItem = async (id: string) => {
@@ -448,25 +548,63 @@ export const deleteShoppingItem = async (id: string) => {
     transaction.onerror = () => reject(transaction.error ?? new Error('Unable to delete the shopping item.'))
     transaction.oncomplete = () => resolve()
   })
+  await syncRemote(
+    () => supabase.from('shopping_items').delete().eq('household_id', activeHouseholdId).eq('id', id),
+    'shopping item deletion',
+  )
 }
 
 export const replaceShoppingItems = async (items: ManualShoppingItem[]) => {
-  const database = await openDatabase()
-  const transaction = database.transaction(shoppingItemStoreName, 'readwrite')
-  const store = transaction.objectStore(shoppingItemStoreName)
-  store.clear()
-  items.forEach((item) => store.put(item))
-  await new Promise<void>((resolve, reject) => {
-    transaction.onerror = () => reject(transaction.error ?? new Error('Unable to import shopping items.'))
-    transaction.oncomplete = () => resolve()
-  })
+  await replaceLocalShoppingItems(items)
+  if (activeHouseholdId) {
+    await syncRemote(
+      async () => {
+        const deleted = await supabase.from('shopping_items').delete().eq('household_id', activeHouseholdId)
+        if (deleted.error) return deleted
+        return supabase.from('shopping_items').upsert(items.map((item) => ({ household_id: activeHouseholdId, id: item.id, data: item })))
+      },
+      'shopping item replacement',
+    )
+  }
 }
 
 export const listShoppingSections = async () => {
   const database = await openDatabase()
   const transaction = database.transaction(shoppingSectionStoreName, 'readonly')
-  const sections = await requestResult(transaction.objectStore(shoppingSectionStoreName).getAll()) as Array<{ name: string }>
-  return sections.map((section) => section.name)
+  const localSections = await requestResult(transaction.objectStore(shoppingSectionStoreName).getAll()) as Array<{ name: string }>
+  if (!activeHouseholdId) return localSections.map((section) => section.name)
+  try {
+    const { data, error } = await supabase.from('shopping_sections').select('name').eq('household_id', activeHouseholdId)
+    if (error) throw error
+    const remoteSections = (data ?? []).map((section) => section.name)
+    if (!remoteSections.length) {
+      await syncRemote(
+        () =>
+          supabase.from('shopping_sections').upsert(
+            localSections.map((section) => ({ household_id: activeHouseholdId, name: section.name })),
+          ),
+        'initial shopping section sync',
+      )
+      return localSections.map((section) => section.name)
+    }
+    await replaceLocalShoppingSections(remoteSections)
+    return remoteSections
+  } catch (error) {
+    reportRemoteFailure('shopping section loading', error)
+    return localSections.map((section) => section.name)
+  }
+}
+
+const replaceLocalShoppingSections = async (sections: string[]) => {
+  const database = await openDatabase()
+  const transaction = database.transaction(shoppingSectionStoreName, 'readwrite')
+  const store = transaction.objectStore(shoppingSectionStoreName)
+  store.clear()
+  sections.forEach((name) => store.put({ name }))
+  await new Promise<void>((resolve, reject) => {
+    transaction.onerror = () => reject(transaction.error ?? new Error('Unable to replace the local shopping sections.'))
+    transaction.oncomplete = () => resolve()
+  })
 }
 
 export const saveShoppingSection = async (name: string) => {
@@ -477,18 +615,24 @@ export const saveShoppingSection = async (name: string) => {
     transaction.onerror = () => reject(transaction.error ?? new Error('Unable to save the shopping section.'))
     transaction.oncomplete = () => resolve()
   })
+  await syncRemote(
+    () => supabase.from('shopping_sections').upsert({ household_id: activeHouseholdId, name }),
+    'shopping section save',
+  )
 }
 
 export const replaceShoppingSections = async (sections: string[]) => {
-  const database = await openDatabase()
-  const transaction = database.transaction(shoppingSectionStoreName, 'readwrite')
-  const store = transaction.objectStore(shoppingSectionStoreName)
-  store.clear()
-  sections.forEach((name) => store.put({ name }))
-  await new Promise<void>((resolve, reject) => {
-    transaction.onerror = () => reject(transaction.error ?? new Error('Unable to import shopping sections.'))
-    transaction.oncomplete = () => resolve()
-  })
+  await replaceLocalShoppingSections(sections)
+  if (activeHouseholdId) {
+    await syncRemote(
+      async () => {
+        const deleted = await supabase.from('shopping_sections').delete().eq('household_id', activeHouseholdId)
+        if (deleted.error) return deleted
+        return supabase.from('shopping_sections').upsert(sections.map((name) => ({ household_id: activeHouseholdId, name })))
+      },
+      'shopping section replacement',
+    )
+  }
 }
 
 export const initializeRecipes = async () => {
