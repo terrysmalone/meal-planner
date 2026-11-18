@@ -351,3 +351,7 @@ Added a repository instruction to remind the user to rerun `supabase/schema.sql`
 ## 17:44 UTC
 
 Removed the fish proverb heading from the hero section to declutter the mobile layout. Files changed: `src/main.ts`, `JOURNAL.md`. Validation: `npm run build`.
+
+## 17:58 UTC
+
+Added a distraction-free "Shopping list" tab (first in the nav) showing only the week label and the checkable list with larger text and tap targets, with the hero and conflict warnings hidden. Files changed: `src/main.ts`, `src/style.css`, `JOURNAL.md`. Validation: `npm run build`.

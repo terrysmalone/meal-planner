@@ -105,7 +105,7 @@ let manualShoppingItems: ManualShoppingItem[] = []
 let manualShoppingSections: string[] = parseArray<string>(savedManualShoppingSections)
 let selectedManualShoppingIds: string[] = parseArray<string>(savedManualShoppingSelection)
 let boughtShoppingItemIds: string[] = parseArray<string>(savedBoughtShoppingItems)
-let activeView: 'plan' | 'recipes' | 'shopping' = 'plan'
+let activeView: 'plan' | 'recipes' | 'shopping' | 'list' = 'plan'
 let isRecipeFormOpen = false
 let viewingRecipeId: string | null = null
 let editingRecipeId: string | null = null
@@ -583,14 +583,14 @@ const aggregateIngredients = () => {
   return grouped
 }
 
-const renderShoppingList = () => {
+const renderShoppingList = (showWarnings = true) => {
   const grouped = aggregateIngredients()
   if (!plannedRecipes.length && !selectedManualShoppingIds.length) {
     return `<div class="empty-state"><span class="empty-icon">✦</span><h3>Your list is empty</h3><p>Add recipes to your week and your combined shopping list will appear here.</p></div>`
   }
   const planned = plannedRecipes.map(({ recipeId }) => getRecipe(recipeId)).filter((recipe): recipe is Recipe => Boolean(recipe))
   const conflicts = findIngredientConflicts(planned)
-  const conflictWarning = conflicts.length
+  const conflictWarning = showWarnings && conflicts.length
     ? `
       <div class="shopping-warning">
         <div class="shopping-warning-heading"><strong>Check ingredient measurements</strong><span>${conflicts.length} conflict${conflicts.length === 1 ? '' : 's'}</span></div>
@@ -799,6 +799,7 @@ const render = () => {
     <header class="topbar">
       <a class="brand" href="#"><span class="brand-mark">✦</span><span>Operation Fish for Life</span></a>
       <nav>
+        <button class="${activeView === 'list' ? 'active' : ''}" data-view="list">Shopping list</button>
         <button class="${activeView === 'plan' ? 'active' : ''}" data-view="plan">Weekly plan</button>
         <button class="${activeView === 'recipes' ? 'active' : ''}" data-view="recipes">My recipes</button>
         <button class="${activeView === 'shopping' ? 'active' : ''}" data-view="shopping">Shopping items</button>
@@ -806,7 +807,12 @@ const render = () => {
       <div class="topbar-actions"><div class="account-menu"><button type="button" class="avatar" data-account-menu aria-haspopup="menu" aria-expanded="${isAccountMenuOpen}">${escapeHtml((currentUser?.email?.charAt(0) ?? 'U').toUpperCase())}</button><div class="account-dropdown ${isAccountMenuOpen ? 'is-open' : ''}" role="menu"><div class="account-label">${escapeHtml(currentUser?.email ?? 'ACCOUNT')}</div><div class="account-label">${escapeHtml(currentHousehold?.name ?? '')} · ${escapeHtml(currentHousehold?.invite_code ?? '')}</div><button type="button" class="dropdown-action" data-export-recipes>Export backup</button><label class="dropdown-action">Import backup<input id="recipe-backup" type="file" accept=".json,application/json"></label><button type="button" class="dropdown-action" data-sign-out>Sign out</button></div></div></div>
     </header>
     <main>
-      <section class="hero">
+      ${
+        activeView === 'list'
+          ? `<div class="eyebrow trip-week">WEEK OF ${selectedWeekLabel().toUpperCase()}</div><div class="trip-list">${renderShoppingList(false)}</div>`
+          : ''
+      }
+      <section class="hero" ${activeView === 'list' ? 'hidden' : ''}>
         <div>
           <div class="week-heading"><button type="button" class="week-nav-button" data-week-previous aria-label="Previous week">←</button><div class="eyebrow">WEEK OF ${selectedWeekLabel().toUpperCase()}</div><button type="button" class="week-nav-button" data-week-next aria-label="Next week">→</button><button type="button" class="outline-button next-week-button" data-default-week>Next week's menu →</button></div>
           <p>Choose your meals for the week and we’ll take care of the shopping list.</p>
@@ -814,7 +820,9 @@ const render = () => {
         <div class="week-summary"><span class="summary-label">${selectedWeekStart === defaultWeekStart ? 'NEXT WEEK' : 'PLANNED WEEK'}</span><strong>${plannedRecipes.length} <small>meals</small></strong><span>${totalServings} servings planned</span></div>
       </section>
       ${
-        activeView === 'recipes'
+        activeView === 'list'
+          ? ''
+          : activeView === 'recipes'
           ? (() => {
               const filteredRecipes = recipes.filter((recipe) => recipeMatchesSearch(recipe, recipeSearchTerm))
               return `<section class="section-header"><div><div class="eyebrow">YOUR COLLECTION</div><h2>Recipes to cook</h2></div><div class="recipe-actions"><input class="recipe-search" id="recipe-search" type="search" value="${escapeHtml(recipeSearchTerm)}" placeholder="Search recipes"><button class="outline-button" data-new-recipe>＋ New recipe</button></div></section>
@@ -857,7 +865,7 @@ const bindEvents = () => {
   document.querySelector<HTMLButtonElement>('[data-default-week]')?.addEventListener('click', () => void returnToDefaultWeek())
   document.querySelectorAll<HTMLElement>('[data-view]').forEach((button) => {
     button.addEventListener('click', () => {
-      activeView = button.dataset.view as 'plan' | 'recipes' | 'shopping'
+      activeView = button.dataset.view as 'plan' | 'recipes' | 'shopping' | 'list'
       render()
     })
   })
