@@ -13,7 +13,7 @@ The app currently stores the selected weekly plan in `localStorage`, so no serve
 
 Recipe data is stored in IndexedDB. Use **Export backup** on the My recipes page; in Chrome, choose the repository's `src/data/recipes.json` in the save dialog to update it directly. Browsers without the File System Access API download `recipes.json` instead. Use **Import backup** to replace the current collection from a valid backup file. Backups include recipes, reusable shopping data, and all saved weekly plans.
 
-The app opens on the next Monday-starting week by default. Use the arrows beside the week heading to move between weeks, or use **Next week's menu** to return to that default week. Each household's weekly recipe plan, serving counts, and selected reusable shopping items are saved separately in Supabase.
+The app opens on the next Monday-starting week by default. Use the arrows beside the week heading to move between weeks, or use **Next week's menu** to return to that default week. Each household's weekly recipe plan, serving counts, selected reusable shopping items, and bought shopping-list items are saved separately in Supabase.
 
 ## Hosted setup
 

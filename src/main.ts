@@ -26,6 +26,7 @@ import type { User } from '@supabase/supabase-js'
 type PlannedRecipe = WeeklyPlanItem
 
 type ShoppingListItem = {
+  id: string
   name: string
   quantity?: number
   unit?: string
@@ -52,6 +53,7 @@ const selectedWeekStorageKey = 'meal-planner-selected-week'
 const legacyManualShoppingStorageKey = 'meal-planner-shopping-items'
 const legacyManualShoppingSectionsStorageKey = 'meal-planner-shopping-sections'
 const manualShoppingSelectionStorageKey = 'meal-planner-selected-shopping-items'
+const boughtShoppingStorageKey = 'meal-planner-bought-shopping-items'
 const defaultShoppingSections = ['Produce', 'Protein', 'Dairy', 'Pantry']
 const mondayForDate = (date: Date) => {
   const monday = new Date(date.getFullYear(), date.getMonth(), date.getDate())
@@ -71,9 +73,11 @@ const defaultWeekStart = dateKey(defaultWeekDate)
 let selectedWeekStart = defaultWeekStart
 const weekStorageKey = (weekStart: string) => `${storageKey}-${weekStart}`
 const weekShoppingSelectionStorageKey = (weekStart: string) => `${manualShoppingSelectionStorageKey}-${weekStart}`
+const weekBoughtShoppingStorageKey = (weekStart: string) => `${boughtShoppingStorageKey}-${weekStart}`
 const savedPlan = localStorage.getItem(weekStorageKey(selectedWeekStart)) ?? localStorage.getItem(storageKey)
 const savedManualShoppingItems = localStorage.getItem(legacyManualShoppingStorageKey)
 const savedManualShoppingSelection = localStorage.getItem(manualShoppingSelectionStorageKey)
+const savedBoughtShoppingItems = localStorage.getItem(weekBoughtShoppingStorageKey(selectedWeekStart)) ?? localStorage.getItem(boughtShoppingStorageKey)
 const savedManualShoppingSections = localStorage.getItem(legacyManualShoppingSectionsStorageKey)
 const legacyManualShoppingItems: ManualShoppingItem[] = savedManualShoppingItems
   ? (JSON.parse(savedManualShoppingItems) as Array<Partial<ManualShoppingItem>>).map((item) => ({
@@ -100,6 +104,7 @@ let plannedRecipes: PlannedRecipe[] = parseArray<PlannedRecipe>(savedPlan)
 let manualShoppingItems: ManualShoppingItem[] = []
 let manualShoppingSections: string[] = parseArray<string>(savedManualShoppingSections)
 let selectedManualShoppingIds: string[] = parseArray<string>(savedManualShoppingSelection)
+let boughtShoppingItemIds: string[] = parseArray<string>(savedBoughtShoppingItems)
 let activeView: 'plan' | 'recipes' | 'shopping' = 'plan'
 let isRecipeFormOpen = false
 let viewingRecipeId: string | null = null
@@ -118,12 +123,18 @@ const savePlan = async () => {
   localStorage.setItem(weekStorageKey(selectedWeekStart), JSON.stringify(plannedRecipes))
   localStorage.setItem(selectedWeekStorageKey, selectedWeekStart)
   if (selectedWeekStart === defaultWeekStart) localStorage.setItem(storageKey, JSON.stringify(plannedRecipes))
-  await saveWeeklyPlan(selectedWeekStart, { recipes: plannedRecipes, selectedShoppingItemIds: selectedManualShoppingIds })
+  await saveWeeklyPlan(selectedWeekStart, { recipes: plannedRecipes, selectedShoppingItemIds: selectedManualShoppingIds, boughtShoppingItemIds })
 }
 const saveManualShoppingSelection = () => {
   const serializedSelection = JSON.stringify(selectedManualShoppingIds)
   localStorage.setItem(manualShoppingSelectionStorageKey, serializedSelection)
   localStorage.setItem(weekShoppingSelectionStorageKey(selectedWeekStart), serializedSelection)
+  void savePlan()
+}
+const saveBoughtShoppingItems = () => {
+  const serializedBoughtItems = JSON.stringify(boughtShoppingItemIds)
+  localStorage.setItem(boughtShoppingStorageKey, serializedBoughtItems)
+  localStorage.setItem(weekBoughtShoppingStorageKey(selectedWeekStart), serializedBoughtItems)
   void savePlan()
 }
 const mirrorShoppingItems = () => localStorage.setItem(legacyManualShoppingStorageKey, JSON.stringify(manualShoppingItems))
@@ -137,7 +148,8 @@ const localWeeklyPlans = () => {
       const weekStart = key.slice(`${storageKey}-`.length)
       const recipes = parseArray<PlannedRecipe>(localStorage.getItem(key))
       const selectedShoppingItemIds = parseArray<string>(localStorage.getItem(weekShoppingSelectionStorageKey(weekStart)))
-      plans.set(weekStart, { weekStart, recipes, selectedShoppingItemIds })
+      const boughtShoppingItemIds = parseArray<string>(localStorage.getItem(weekBoughtShoppingStorageKey(weekStart)))
+      plans.set(weekStart, { weekStart, recipes, selectedShoppingItemIds, boughtShoppingItemIds })
     })
   return [...plans.values()]
 }
@@ -145,7 +157,7 @@ const localWeeklyPlans = () => {
 const weeklyPlansForBackup = async () => {
   const plans = new Map(localWeeklyPlans().map((plan) => [plan.weekStart, plan]))
   ;(await listWeeklyPlans()).forEach((plan) => plans.set(plan.weekStart, plan))
-  plans.set(selectedWeekStart, { weekStart: selectedWeekStart, recipes: plannedRecipes, selectedShoppingItemIds: selectedManualShoppingIds })
+  plans.set(selectedWeekStart, { weekStart: selectedWeekStart, recipes: plannedRecipes, selectedShoppingItemIds: selectedManualShoppingIds, boughtShoppingItemIds })
   return [...plans.values()].sort((first, second) => first.weekStart.localeCompare(second.weekStart))
 }
 
@@ -252,7 +264,10 @@ const isWeeklyPlanRecords = (value: unknown): value is WeeklyPlanRecord[] =>
           typeof recipe.servings === 'number',
       ) &&
       Array.isArray((plan as WeeklyPlanRecord).selectedShoppingItemIds) &&
-      (plan as WeeklyPlanRecord).selectedShoppingItemIds.every((id) => typeof id === 'string'),
+      (plan as WeeklyPlanRecord).selectedShoppingItemIds.every((id) => typeof id === 'string') &&
+      ((plan as Partial<WeeklyPlanRecord>).boughtShoppingItemIds === undefined ||
+        (Array.isArray((plan as Partial<WeeklyPlanRecord>).boughtShoppingItemIds) &&
+          (plan as Partial<WeeklyPlanRecord>).boughtShoppingItemIds!.every((id) => typeof id === 'string'))),
   )
 
 const parseRecipeBackup = (value: unknown): RecipeBackup | null => {
@@ -302,13 +317,15 @@ const importRecipeBackup = async (file: File) => {
       await replaceShoppingSections(backup.shoppingSections)
     }
     if (backup.weeklyPlans) {
-      await replaceWeeklyPlans(backup.weeklyPlans)
+      const weeklyPlans = backup.weeklyPlans.map((plan) => ({ ...plan, boughtShoppingItemIds: plan.boughtShoppingItemIds ?? [] }))
+      await replaceWeeklyPlans(weeklyPlans)
       Object.keys(localStorage)
-        .filter((key) => key.startsWith(`${storageKey}-`) || key.startsWith(`${manualShoppingSelectionStorageKey}-`))
+        .filter((key) => key.startsWith(`${storageKey}-`) || key.startsWith(`${manualShoppingSelectionStorageKey}-`) || key.startsWith(`${boughtShoppingStorageKey}-`))
         .forEach((key) => localStorage.removeItem(key))
-      backup.weeklyPlans.forEach((plan) => {
+      weeklyPlans.forEach((plan) => {
         localStorage.setItem(weekStorageKey(plan.weekStart), JSON.stringify(plan.recipes))
         localStorage.setItem(weekShoppingSelectionStorageKey(plan.weekStart), JSON.stringify(plan.selectedShoppingItemIds))
+        localStorage.setItem(weekBoughtShoppingStorageKey(plan.weekStart), JSON.stringify(plan.boughtShoppingItemIds))
       })
     }
     if (!recipeOnlyImport) {
@@ -319,6 +336,7 @@ const importRecipeBackup = async (file: File) => {
     plannedRecipes = importedWeek?.recipes ?? (backup.weeklyPlans ? [] : plannedRecipes)
     selectedManualShoppingIds = (importedWeek?.selectedShoppingItemIds ?? backup.selectedShoppingItemIds)
       .filter((id) => manualShoppingItems.some((item) => item.id === id))
+    boughtShoppingItemIds = (importedWeek?.boughtShoppingItemIds ?? []).filter((id) => typeof id === 'string')
     mirrorShoppingItems()
     mirrorShoppingSections()
     saveManualShoppingSelection()
@@ -354,19 +372,28 @@ const loadSelectedWeekPlan = async () => {
   const savedLocalSelection = localStorage.getItem(weekShoppingSelectionStorageKey(selectedWeekStart))
     ?? (selectedWeekStart === defaultWeekStart ? localStorage.getItem(manualShoppingSelectionStorageKey) : null)
   const localSelection = parseArray<string>(savedLocalSelection)
+  const savedLocalBoughtItems = localStorage.getItem(weekBoughtShoppingStorageKey(selectedWeekStart))
+    ?? (selectedWeekStart === defaultWeekStart ? localStorage.getItem(boughtShoppingStorageKey) : null)
+  const localBoughtItems = parseArray<string>(savedLocalBoughtItems)
   const remotePlan = await loadWeeklyPlan(selectedWeekStart)
   loadedWeeklyPlanFromRemote = remotePlan !== null
   plannedRecipes = remotePlan && Array.isArray(remotePlan.recipes) ? remotePlan.recipes : localPlan
   if (remotePlan) {
     selectedManualShoppingIds = Array.isArray(remotePlan.selectedShoppingItemIds) ? remotePlan.selectedShoppingItemIds : []
+    boughtShoppingItemIds = Array.isArray(remotePlan.boughtShoppingItemIds) ? remotePlan.boughtShoppingItemIds : []
   }
-  else selectedManualShoppingIds = localSelection
+  else {
+    selectedManualShoppingIds = localSelection
+    boughtShoppingItemIds = localBoughtItems
+  }
   localStorage.setItem(weekStorageKey(selectedWeekStart), JSON.stringify(plannedRecipes))
   if (selectedWeekStart === defaultWeekStart) localStorage.setItem(storageKey, JSON.stringify(plannedRecipes))
   localStorage.setItem(weekShoppingSelectionStorageKey(selectedWeekStart), JSON.stringify(selectedManualShoppingIds))
   if (selectedWeekStart === defaultWeekStart) localStorage.setItem(manualShoppingSelectionStorageKey, JSON.stringify(selectedManualShoppingIds))
-  if (remotePlan === null && (localPlan.length || localSelection.length)) {
-    await saveWeeklyPlan(selectedWeekStart, { recipes: localPlan, selectedShoppingItemIds: localSelection })
+  localStorage.setItem(weekBoughtShoppingStorageKey(selectedWeekStart), JSON.stringify(boughtShoppingItemIds))
+  if (selectedWeekStart === defaultWeekStart) localStorage.setItem(boughtShoppingStorageKey, JSON.stringify(boughtShoppingItemIds))
+  if (remotePlan === null && (localPlan.length || localSelection.length || localBoughtItems.length)) {
+    await saveWeeklyPlan(selectedWeekStart, { recipes: localPlan, selectedShoppingItemIds: localSelection, boughtShoppingItemIds: localBoughtItems })
   }
 }
 
@@ -538,7 +565,7 @@ const aggregateIngredients = () => {
       const key = JSON.stringify([ingredient.name.trim().toLowerCase(), ingredient.unit.trim().toLowerCase()])
       const current = category.get(key)
       const scaled = ingredient.quantity * (servings / recipe.servings)
-      category.set(key, { name: ingredient.name, quantity: (current?.quantity ?? 0) + scaled, unit: ingredient.unit })
+      category.set(key, { id: `ingredient:${key}`, name: ingredient.name, quantity: (current?.quantity ?? 0) + scaled, unit: ingredient.unit })
       grouped.set(ingredient.category, category)
     })
   })
@@ -546,7 +573,7 @@ const aggregateIngredients = () => {
     .filter((item) => selectedManualShoppingIds.includes(item.id))
     .forEach((item) => {
       const category = grouped.get(item.section) ?? new Map()
-      category.set(`manual:${item.id}`, { name: item.name, quantity: item.quantity, unit: item.unit })
+      category.set(`manual:${item.id}`, { id: `manual:${item.id}`, name: item.name, quantity: item.quantity, unit: item.unit })
       grouped.set(item.section, category)
     })
   return grouped
@@ -605,7 +632,7 @@ const renderShoppingList = () => {
             .map(
               (item) => `
                 <label class="shopping-item">
-                  <input type="checkbox">
+                  <input type="checkbox" data-bought-shopping-item="${escapeHtml(item.id)}" ${boughtShoppingItemIds.includes(item.id) ? 'checked' : ''}>
                   <span class="checkmark"></span>
                   <span>${escapeHtml(item.name)}</span>
                   ${item.quantity === undefined ? '' : `<strong>${formatQuantity(item.quantity)} ${escapeHtml(item.unit ?? '')}</strong>`}
@@ -925,11 +952,22 @@ const bindEvents = () => {
       render()
     })
   })
+  document.querySelectorAll<HTMLInputElement>('[data-bought-shopping-item]').forEach((input) => {
+    input.addEventListener('change', () => {
+      const itemId = input.dataset.boughtShoppingItem!
+      boughtShoppingItemIds = input.checked
+        ? [...new Set([...boughtShoppingItemIds, itemId])]
+        : boughtShoppingItemIds.filter((id) => id !== itemId)
+      saveBoughtShoppingItems()
+      render()
+    })
+  })
   document.querySelectorAll<HTMLElement>('[data-delete-manual-shopping-item]').forEach((button) => {
     button.addEventListener('click', async () => {
       const itemId = button.dataset.deleteManualShoppingItem!
       manualShoppingItems = manualShoppingItems.filter((item) => item.id !== itemId)
       selectedManualShoppingIds = selectedManualShoppingIds.filter((id) => id !== itemId)
+      boughtShoppingItemIds = boughtShoppingItemIds.filter((id) => id !== `manual:${itemId}`)
       await deleteShoppingItem(itemId)
       mirrorShoppingItems()
       saveManualShoppingSelection()

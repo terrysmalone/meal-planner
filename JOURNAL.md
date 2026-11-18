@@ -330,6 +330,10 @@ Removed all standalone recipe import files at the user's request before pushing 
 
 Improved responsive styling for desktop, tablet, and mobile layouts without changing application behavior. Added responsive navigation, hero/week controls, recipe cards, shopping forms, modal sizing, and touch-friendly controls. Validation: `npm run build`, `npm run build:github-pages`, and `git diff --check`.
 
+## 17:28 UTC
+
+Added per-week bought-state persistence for generated and reusable shopping-list items. Checked items are stored in the weekly plan JSON, synchronized through Supabase, restored across devices, and retained in backups. Older weekly plans default to no bought items. Validation: `npm run build`, `npm run build:github-pages`, and `git diff --check`.
+
 ## 17:02 UTC
 
 Updated `.github/copilot-instructions.md` to require local verification before any commit or push and to prohibit automatic commits or pushes unless explicitly requested. These changes remain uncommitted and unpushed.

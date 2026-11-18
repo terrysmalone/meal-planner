@@ -35,6 +35,7 @@ export type WeeklyPlanItem = {
 export type WeeklyPlan = {
   recipes: WeeklyPlanItem[]
   selectedShoppingItemIds: string[]
+  boughtShoppingItemIds: string[]
 }
 
 export type WeeklyPlanRecord = WeeklyPlan & {
@@ -740,12 +741,13 @@ export const loadWeeklyPlan = async (weekStart: string): Promise<WeeklyPlan | nu
 }
 
 const parseWeeklyPlanData = (value: unknown): WeeklyPlan => {
-  if (Array.isArray(value)) return { recipes: value as WeeklyPlanItem[], selectedShoppingItemIds: [] }
-  if (!value || typeof value !== 'object') return { recipes: [], selectedShoppingItemIds: [] }
+  if (Array.isArray(value)) return { recipes: value as WeeklyPlanItem[], selectedShoppingItemIds: [], boughtShoppingItemIds: [] }
+  if (!value || typeof value !== 'object') return { recipes: [], selectedShoppingItemIds: [], boughtShoppingItemIds: [] }
   const savedPlan = value as Partial<WeeklyPlan>
   return {
     recipes: Array.isArray(savedPlan.recipes) ? savedPlan.recipes : [],
     selectedShoppingItemIds: Array.isArray(savedPlan.selectedShoppingItemIds) ? savedPlan.selectedShoppingItemIds : [],
+    boughtShoppingItemIds: Array.isArray(savedPlan.boughtShoppingItemIds) ? savedPlan.boughtShoppingItemIds : [],
   }
 }
 
