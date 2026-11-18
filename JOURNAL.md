@@ -326,6 +326,10 @@ Added recipe-only import files and starter entries for “Chicken Fajita Tray Ba
 
 Removed all standalone recipe import files at the user's request before pushing the recipe and additive-import changes.
 
+## 17:26 UTC
+
+Improved responsive styling for desktop, tablet, and mobile layouts without changing application behavior. Added responsive navigation, hero/week controls, recipe cards, shopping forms, modal sizing, and touch-friendly controls. Validation: `npm run build`, `npm run build:github-pages`, and `git diff --check`.
+
 ## 17:02 UTC
 
 Updated `.github/copilot-instructions.md` to require local verification before any commit or push and to prohibit automatic commits or pushes unless explicitly requested. These changes remain uncommitted and unpushed.
