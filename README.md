@@ -13,6 +13,8 @@ The app currently stores the selected weekly plan in `localStorage`, so no serve
 
 Recipe data is stored in IndexedDB. Use **Export backup** on the My recipes page; in Chrome, choose the repository's `src/data/recipes.json` in the save dialog to update it directly. Browsers without the File System Access API download `recipes.json` instead. Use **Import backup** to replace the current collection from a valid backup file.
 
+Use the arrows beside the week heading to move between Monday-starting weeks. Each household's weekly recipe plan, including serving counts, is saved separately in Supabase.
+
 ## Hosted setup
 
 The hosted deployment uses GitHub Pages for the Vite frontend and Supabase for shared data across machines. The Supabase project should use:

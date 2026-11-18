@@ -13,16 +13,15 @@ import {
   saveRecipe,
   saveShoppingItem,
   saveShoppingSection,
+  loadWeeklyPlan,
+  saveWeeklyPlan,
   setActiveHousehold,
 } from './recipe-store'
 import type { Household } from './auth'
-import type { Category, Ingredient, ManualShoppingItem, Recipe } from './recipe-store'
+import type { Category, Ingredient, ManualShoppingItem, Recipe, WeeklyPlanItem } from './recipe-store'
 import type { User } from '@supabase/supabase-js'
 
-type PlannedRecipe = {
-  recipeId: string
-  servings: number
-}
+type PlannedRecipe = WeeklyPlanItem
 
 type ShoppingListItem = {
   name: string
@@ -47,11 +46,27 @@ type SaveFilePickerWindow = Window & {
 }
 
 const storageKey = 'meal-planner-plan'
+const selectedWeekStorageKey = 'meal-planner-selected-week'
 const legacyManualShoppingStorageKey = 'meal-planner-shopping-items'
 const legacyManualShoppingSectionsStorageKey = 'meal-planner-shopping-sections'
 const manualShoppingSelectionStorageKey = 'meal-planner-selected-shopping-items'
 const defaultShoppingSections = ['Produce', 'Protein', 'Dairy', 'Pantry']
-const savedPlan = localStorage.getItem(storageKey)
+const mondayForDate = (date: Date) => {
+  const monday = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+  const day = monday.getDay()
+  monday.setDate(monday.getDate() + (day === 0 ? -6 : 1 - day))
+  return monday
+}
+const dateKey = (date: Date) => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+const currentWeekStart = dateKey(mondayForDate(new Date()))
+let selectedWeekStart = localStorage.getItem(selectedWeekStorageKey) ?? currentWeekStart
+const weekStorageKey = (weekStart: string) => `${storageKey}-${weekStart}`
+const savedPlan = localStorage.getItem(weekStorageKey(selectedWeekStart)) ?? localStorage.getItem(storageKey)
 const savedManualShoppingItems = localStorage.getItem(legacyManualShoppingStorageKey)
 const savedManualShoppingSelection = localStorage.getItem(manualShoppingSelectionStorageKey)
 const savedManualShoppingSections = localStorage.getItem(legacyManualShoppingSectionsStorageKey)
@@ -84,7 +99,12 @@ let authError = ''
 
 const app = document.querySelector<HTMLDivElement>('#app')!
 
-const savePlan = () => localStorage.setItem(storageKey, JSON.stringify(plannedRecipes))
+const savePlan = async () => {
+  localStorage.setItem(weekStorageKey(selectedWeekStart), JSON.stringify(plannedRecipes))
+  localStorage.setItem(selectedWeekStorageKey, selectedWeekStart)
+  if (selectedWeekStart === currentWeekStart) localStorage.setItem(storageKey, JSON.stringify(plannedRecipes))
+  await saveWeeklyPlan(selectedWeekStart, plannedRecipes)
+}
 const saveManualShoppingSelection = () => localStorage.setItem(manualShoppingSelectionStorageKey, JSON.stringify(selectedManualShoppingIds))
 const mirrorShoppingItems = () => localStorage.setItem(legacyManualShoppingStorageKey, JSON.stringify(manualShoppingItems))
 const mirrorShoppingSections = () => localStorage.setItem(legacyManualShoppingSectionsStorageKey, JSON.stringify(manualShoppingSections))
@@ -225,11 +245,9 @@ const importRecipeBackup = async (file: File) => {
 const formatQuantity = (quantity: number) =>
   Number.isInteger(quantity) ? String(quantity) : quantity.toFixed(1).replace('.0', '')
 
-const nextWeekLabel = () => {
-  const today = new Date()
-  const daysUntilNextMonday = ((8 - today.getDay()) % 7) || 7
-  const monday = new Date(today)
-  monday.setDate(today.getDate() + daysUntilNextMonday)
+const selectedWeekLabel = () => {
+  const [year, month, day] = selectedWeekStart.split('-').map(Number)
+  const monday = new Date(year, month - 1, day)
   const sunday = new Date(monday)
   sunday.setDate(monday.getDate() + 6)
   const monthFormatter = new Intl.DateTimeFormat('en-US', { month: 'long' })
@@ -238,6 +256,27 @@ const nextWeekLabel = () => {
   return startMonth === endMonth
     ? `${startMonth} ${monday.getDate()}–${sunday.getDate()}`
     : `${startMonth} ${monday.getDate()}–${endMonth} ${sunday.getDate()}`
+}
+
+const loadSelectedWeekPlan = async () => {
+  const savedLocalPlan = localStorage.getItem(weekStorageKey(selectedWeekStart))
+    ?? (selectedWeekStart === currentWeekStart ? localStorage.getItem(storageKey) : null)
+  const localPlan: PlannedRecipe[] = savedLocalPlan ? JSON.parse(savedLocalPlan) : []
+  const remotePlan = await loadWeeklyPlan(selectedWeekStart)
+  plannedRecipes = remotePlan ?? localPlan
+  localStorage.setItem(weekStorageKey(selectedWeekStart), JSON.stringify(plannedRecipes))
+  if (selectedWeekStart === currentWeekStart) localStorage.setItem(storageKey, JSON.stringify(plannedRecipes))
+  if (remotePlan === null && localPlan.length) await saveWeeklyPlan(selectedWeekStart, localPlan)
+}
+
+const changeSelectedWeek = async (offset: number) => {
+  await savePlan()
+  const [year, month, day] = selectedWeekStart.split('-').map(Number)
+  const nextMonday = new Date(year, month - 1, day)
+  nextMonday.setDate(nextMonday.getDate() + offset * 7)
+  selectedWeekStart = dateKey(nextMonday)
+  await loadSelectedWeekPlan()
+  render()
 }
 
 const escapeHtml = (value: string) =>
@@ -630,11 +669,11 @@ const render = () => {
     <main>
       <section class="hero">
         <div>
-          <div class="eyebrow">WEEK OF ${nextWeekLabel().toUpperCase()}</div>
+          <div class="week-heading"><button type="button" class="week-nav-button" data-week-previous aria-label="Previous week">←</button><div class="eyebrow">WEEK OF ${selectedWeekLabel().toUpperCase()}</div><button type="button" class="week-nav-button" data-week-next aria-label="Next week">→</button></div>
           <h1>Give a man a fish and he'll eat for a day.<br><i>Teach him how to fish and he'll eat for life.</i></h1>
           <p>Choose your meals for the week and we’ll take care of the shopping list.</p>
         </div>
-        <div class="week-summary"><span class="summary-label">THIS WEEK</span><strong>${plannedRecipes.length} <small>meals</small></strong><span>${totalServings} servings planned</span></div>
+        <div class="week-summary"><span class="summary-label">${selectedWeekStart === currentWeekStart ? 'THIS WEEK' : 'PLANNED WEEK'}</span><strong>${plannedRecipes.length} <small>meals</small></strong><span>${totalServings} servings planned</span></div>
       </section>
       ${
         activeView === 'recipes'
@@ -675,6 +714,8 @@ const render = () => {
 }
 
 const bindEvents = () => {
+  document.querySelector<HTMLButtonElement>('[data-week-previous]')?.addEventListener('click', () => void changeSelectedWeek(-1))
+  document.querySelector<HTMLButtonElement>('[data-week-next]')?.addEventListener('click', () => void changeSelectedWeek(1))
   document.querySelectorAll<HTMLElement>('[data-view]').forEach((button) => {
     button.addEventListener('click', () => {
       activeView = button.dataset.view as 'plan' | 'recipes' | 'shopping'
@@ -872,6 +913,7 @@ const bindEvents = () => {
 
 const loadHouseholdData = async () => {
   recipes = await initializeRecipes()
+  await loadSelectedWeekPlan()
   const storedShoppingItems = await listShoppingItems()
   if (!storedShoppingItems.length && legacyManualShoppingItems.length) {
     await Promise.all(legacyManualShoppingItems.map((item) => saveShoppingItem(item)))

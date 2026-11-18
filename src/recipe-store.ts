@@ -27,6 +27,11 @@ export type ManualShoppingItem = {
   unit?: string
 }
 
+export type WeeklyPlanItem = {
+  recipeId: string
+  servings: number
+}
+
 const databaseName = 'operation-fish-for-life'
 const databaseVersion = 16
 const recipeStoreName = 'recipes'
@@ -633,6 +638,30 @@ export const replaceShoppingSections = async (sections: string[]) => {
       'shopping section replacement',
     )
   }
+}
+
+export const loadWeeklyPlan = async (weekStart: string) => {
+  if (!activeHouseholdId) return null
+  try {
+    const { data, error } = await supabase
+      .from('weekly_plans')
+      .select('data')
+      .eq('household_id', activeHouseholdId)
+      .eq('week_start', weekStart)
+      .maybeSingle()
+    if (error) throw error
+    return data ? data.data as WeeklyPlanItem[] : null
+  } catch (error) {
+    reportRemoteFailure('weekly plan loading', error)
+    return null
+  }
+}
+
+export const saveWeeklyPlan = async (weekStart: string, plan: WeeklyPlanItem[]) => {
+  await syncRemote(
+    () => supabase.from('weekly_plans').upsert({ household_id: activeHouseholdId, week_start: weekStart, data: plan }),
+    'weekly plan save',
+  )
 }
 
 export const initializeRecipes = async () => {

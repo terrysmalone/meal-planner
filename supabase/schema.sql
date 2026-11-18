@@ -37,6 +37,14 @@ create table if not exists public.shopping_sections (
   primary key (household_id, name)
 );
 
+create table if not exists public.weekly_plans (
+  household_id uuid not null references public.households(id) on delete cascade,
+  week_start date not null,
+  data jsonb not null,
+  updated_at timestamptz not null default now(),
+  primary key (household_id, week_start)
+);
+
 create or replace function public.is_household_member(target_household_id uuid)
 returns boolean
 language sql
@@ -111,6 +119,7 @@ alter table public.household_members enable row level security;
 alter table public.recipes enable row level security;
 alter table public.shopping_items enable row level security;
 alter table public.shopping_sections enable row level security;
+alter table public.weekly_plans enable row level security;
 
 drop policy if exists "Members can view their households" on public.households;
 create policy "Members can view their households"
@@ -141,6 +150,13 @@ with check (public.is_household_member(household_id));
 drop policy if exists "Members can manage shopping sections" on public.shopping_sections;
 create policy "Members can manage shopping sections"
 on public.shopping_sections for all
+to authenticated
+using (public.is_household_member(household_id))
+with check (public.is_household_member(household_id));
+
+drop policy if exists "Members can manage weekly plans" on public.weekly_plans;
+create policy "Members can manage weekly plans"
+on public.weekly_plans for all
 to authenticated
 using (public.is_household_member(household_id))
 with check (public.is_household_member(household_id));
