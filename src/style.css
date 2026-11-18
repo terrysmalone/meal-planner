@@ -72,21 +72,20 @@ h2 { color: #2d4336; font-size: 26px; letter-spacing: -1px; margin-top: 8px; }
 .shopping-warning .text-button { padding: 0; color: #9a7541; font-size: 10px; text-align: left; }
 .manual-shopping { padding-top: 20px; }
 .manual-shopping-form { display: flex; gap: 7px; margin-bottom: 8px; }
-.manual-shopping-form input { min-width: 0; flex: 1; border: 1px solid #dfe7dc; border-radius: 5px; padding: 8px 9px; color: #35473c; background: #fbfcfa; font: inherit; font-size: 11px; }
+.manual-shopping-form input, .manual-shopping-form select { min-width: 0; flex: 1; border: 1px solid #dfe7dc; border-radius: 5px; padding: 8px 9px; color: #35473c; background: #fbfcfa; font: inherit; font-size: 11px; }
+.manual-shopping-form input[name="item"] { flex: 2; }
 .manual-shopping-form input:focus { outline: 2px solid #dcebd8; border-color: #9fbd9a; }
 .manual-shopping-form .outline-button { padding: 7px 10px; }
-.manual-shopping-list { list-style: none; margin: 0; padding: 0; }
-.manual-shopping-item { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid #f1f3ef; color: #56645b; font-size: 12px; }
-.manual-shopping-item .delete-button { font-size: 10px; }
-.manual-shopping-empty { color: #98a19b; font-size: 11px; line-height: 1.4; }
 .shopping-items-manager { max-width: 620px; background: #fff; border: 1px solid #e6ebe3; border-radius: 7px; padding: 25px; }
 .shopping-items-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 360px); gap: 34px; align-items: start; }
 .shopping-items-manager .panel-intro { padding-bottom: 17px; border-bottom: 1px solid #edf0ea; }
 .shopping-items-manager .manual-shopping-form { margin-top: 17px; }
 .shopping-items-catalog { list-style: none; margin: 18px 0 0; padding: 0; border-top: 1px solid #edf0ea; }
-.shopping-items-catalog li { padding: 11px 0; border-bottom: 1px solid #f1f3ef; color: #56645b; font-size: 12px; }
+.shopping-items-catalog li { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid #f1f3ef; color: #56645b; font-size: 12px; }
 .shopping-items-catalog label { display: flex; align-items: center; gap: 9px; cursor: pointer; }
 .shopping-items-catalog input { width: 15px; height: 15px; accent-color: #88a980; }
+.shopping-items-catalog small { margin-left: auto; color: #98a19b; font-size: 10px; }
+.shopping-items-catalog .delete-button { font-size: 10px; }
 .shopping-group { padding-top: 19px; }
 .shopping-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
 .shopping-heading h3 { font-size: 12px; color: #71916e; text-transform: uppercase; letter-spacing: 1px; }
@@ -128,7 +127,7 @@ footer { border-top: 1px solid #e6e9e1; color: #a2aaa3; display: flex; justify-c
 @media (max-width: 520px) { nav { gap: 12px; } .recipe-grid { grid-template-columns: 1fr; } main { padding: 42px 18px; } footer { padding: 18px; display: block; } footer span { display: block; margin: 4px 0; } .recipe-modal { padding: 20px; } .form-grid { grid-template-columns: 1fr; } .form-grid label:nth-child(2), .form-grid label:nth-child(5) { grid-column: auto; } .recipe-actions { align-items: stretch; flex-direction: column; gap: 10px; } .recipe-search { width: 100%; } }
 @media print {
   @page { size: A4 portrait; margin: 8mm; }
-  .topbar, .hero, .section-header, footer, .recipe-grid, .shopping-warning, .panel-header, .panel-intro, .print-button, .manual-shopping-form, .manual-shopping-empty, .manual-shopping-item .delete-button, .shopping-item input, .shopping-item .checkmark, .shopping-heading span { display: none; }
+  .topbar, .hero, .section-header, footer, .recipe-grid, .shopping-warning, .panel-header, .panel-intro, .print-button, .manual-shopping-form, .shopping-items-catalog .delete-button, .shopping-item input, .shopping-item .checkmark, .shopping-heading span { display: none; }
   main { max-width: none; padding: 0; }
   .content-grid { display: block; }
   .shopping-panel { border: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 18px; }
@@ -143,7 +142,4 @@ footer { border-top: 1px solid #e6e9e1; color: #a2aaa3; display: flex; justify-c
   .shopping-item { padding: 2px 0; border-bottom: 0; font-size: 8px; line-height: 1.15; gap: 4px; }
   .shopping-item span:nth-child(3) { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .shopping-item strong { font-size: 8px; white-space: nowrap; }
-  .manual-shopping { padding-top: 4px; break-inside: avoid; }
-  .manual-shopping-list { display: grid; gap: 1px; }
-  .manual-shopping-item { display: block; padding: 2px 0; border-bottom: 0; font-size: 8px; }
 }

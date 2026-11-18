@@ -10,6 +10,15 @@ type PlannedRecipe = {
 type ManualShoppingItem = {
   id: string
   name: string
+  section: string
+  quantity?: number
+  unit?: string
+}
+
+type ShoppingListItem = {
+  name: string
+  quantity?: number
+  unit?: string
 }
 
 type IngredientConflict = {
@@ -31,12 +40,26 @@ type SaveFilePickerWindow = Window & {
 const storageKey = 'meal-planner-plan'
 const manualShoppingStorageKey = 'meal-planner-shopping-items'
 const manualShoppingSelectionStorageKey = 'meal-planner-selected-shopping-items'
+const manualShoppingSectionsStorageKey = 'meal-planner-shopping-sections'
+const defaultShoppingSections = ['Produce', 'Protein', 'Dairy', 'Pantry']
 const savedPlan = localStorage.getItem(storageKey)
 const savedManualShoppingItems = localStorage.getItem(manualShoppingStorageKey)
 const savedManualShoppingSelection = localStorage.getItem(manualShoppingSelectionStorageKey)
+const savedManualShoppingSections = localStorage.getItem(manualShoppingSectionsStorageKey)
 let recipes: Recipe[] = []
 let plannedRecipes: PlannedRecipe[] = savedPlan ? JSON.parse(savedPlan) : []
-let manualShoppingItems: ManualShoppingItem[] = savedManualShoppingItems ? JSON.parse(savedManualShoppingItems) : []
+let manualShoppingItems: ManualShoppingItem[] = savedManualShoppingItems
+  ? (JSON.parse(savedManualShoppingItems) as Array<Partial<ManualShoppingItem>>).map((item) => ({
+      id: item.id ?? crypto.randomUUID(),
+      name: item.name ?? '',
+      section: item.section ?? 'Pantry',
+      quantity: typeof item.quantity === 'number' ? item.quantity : undefined,
+      unit: item.unit ?? '',
+    }))
+  : []
+let manualShoppingSections: string[] = savedManualShoppingSections
+  ? JSON.parse(savedManualShoppingSections)
+  : []
 let selectedManualShoppingIds: string[] = savedManualShoppingSelection
   ? JSON.parse(savedManualShoppingSelection)
   : manualShoppingItems.map((item) => item.id)
@@ -53,6 +76,8 @@ const savePlan = () => localStorage.setItem(storageKey, JSON.stringify(plannedRe
 const saveManualShoppingItems = () => localStorage.setItem(manualShoppingStorageKey, JSON.stringify(manualShoppingItems))
 const saveManualShoppingSelection = () =>
   localStorage.setItem(manualShoppingSelectionStorageKey, JSON.stringify(selectedManualShoppingIds))
+const saveManualShoppingSections = () =>
+  localStorage.setItem(manualShoppingSectionsStorageKey, JSON.stringify(manualShoppingSections))
 
 const exportRecipeBackup = async () => {
   const contents = JSON.stringify(recipes, null, 2)
@@ -162,6 +187,8 @@ const recipeMatchesSearch = (recipe: Recipe, term: string) => {
     .toLowerCase()
   return searchableText.includes(term.trim().toLowerCase())
 }
+
+const shoppingSections = () => [...defaultShoppingSections, ...manualShoppingSections.filter((section) => !defaultShoppingSections.includes(section))]
 
 const normalizeIngredientPart = (value: string) => value.trim().toLowerCase()
 
@@ -283,7 +310,7 @@ const recipeDetails = (recipe: Recipe) => `
 `
 
 const aggregateIngredients = () => {
-  const grouped = new Map<Category, Map<string, { name: string; quantity: number; unit: string }>>()
+  const grouped = new Map<string, Map<string, ShoppingListItem>>()
   plannedRecipes.forEach(({ recipeId, servings }) => {
     const recipe = getRecipe(recipeId)
     if (!recipe) return
@@ -296,12 +323,19 @@ const aggregateIngredients = () => {
       grouped.set(ingredient.category, category)
     })
   })
+  manualShoppingItems
+    .filter((item) => selectedManualShoppingIds.includes(item.id))
+    .forEach((item) => {
+      const category = grouped.get(item.section) ?? new Map()
+      category.set(`manual:${item.id}`, { name: item.name, quantity: item.quantity, unit: item.unit })
+      grouped.set(item.section, category)
+    })
   return grouped
 }
 
 const renderShoppingList = () => {
   const grouped = aggregateIngredients()
-  if (!plannedRecipes.length) {
+  if (!plannedRecipes.length && !selectedManualShoppingIds.length) {
     return `<div class="empty-state"><span class="empty-icon">✦</span><h3>Your list is empty</h3><p>Add recipes to your week and your combined shopping list will appear here.</p></div>`
   }
   const planned = plannedRecipes.map(({ recipeId }) => getRecipe(recipeId)).filter((recipe): recipe is Recipe => Boolean(recipe))
@@ -341,8 +375,7 @@ const renderShoppingList = () => {
       </div>
     `
     : ''
-  const categories: Category[] = ['Produce', 'Protein', 'Dairy', 'Pantry']
-  return `${conflictWarning}${categories
+  return `${conflictWarning}${shoppingSections()
     .filter((category) => grouped.has(category))
     .map(
       (category) => `
@@ -356,7 +389,7 @@ const renderShoppingList = () => {
                   <input type="checkbox">
                   <span class="checkmark"></span>
                   <span>${escapeHtml(item.name)}</span>
-                  <strong>${formatQuantity(item.quantity)} ${escapeHtml(item.unit)}</strong>
+                  ${item.quantity === undefined ? '' : `<strong>${formatQuantity(item.quantity)} ${escapeHtml(item.unit ?? '')}</strong>`}
                 </label>
               `,
             )
@@ -367,16 +400,6 @@ const renderShoppingList = () => {
     .join('')}`
 }
 
-const renderManualShoppingItems = () => `
-  <section class="manual-shopping">
-    <div class="shopping-heading"><h3>One-off items</h3><span>${selectedManualShoppingIds.length} items</span></div>
-    <ul class="manual-shopping-list">${manualShoppingItems
-      .filter((item) => selectedManualShoppingIds.includes(item.id))
-      .map((item) => `<li class="manual-shopping-item"><span>${escapeHtml(item.name)}</span></li>`)
-      .join('')}</ul>
-  </section>
-`
-
 const renderShoppingItemsView = () => `
   <section class="section-header">
     <div><div class="eyebrow">REUSABLE ITEMS</div><h2>Shopping items</h2></div>
@@ -386,6 +409,12 @@ const renderShoppingItemsView = () => `
       <p class="panel-intro">Add regular items once, then select them whenever you need them on your shopping list.</p>
       <form class="manual-shopping-form" id="manual-shopping-form">
         <input name="item" type="text" placeholder="Milk, bread, ready meals..." aria-label="Shopping item" required>
+        <input name="quantity" type="number" min="0.01" step="any" placeholder="Qty" aria-label="Quantity">
+        <input name="unit" type="text" placeholder="Unit" aria-label="Unit">
+        <select id="manual-shopping-section" name="section" aria-label="Shopping section">${shoppingSections()
+          .map((section) => `<option value="${escapeHtml(section)}">${escapeHtml(section)}</option>`)
+          .join('')}<option value="__new__">＋ New section</option></select>
+        <input name="new-section" type="text" placeholder="New section name" aria-label="New section name" hidden>
         <button type="submit" class="outline-button">Add item</button>
       </form>
       ${
@@ -394,7 +423,8 @@ const renderShoppingItemsView = () => `
               .map(
                 (item) => `
                   <li>
-                    <label><input type="checkbox" data-manual-shopping-toggle="${escapeHtml(item.id)}" ${selectedManualShoppingIds.includes(item.id) ? 'checked' : ''}><span>${escapeHtml(item.name)}</span></label>
+                    <label><input type="checkbox" data-manual-shopping-toggle="${escapeHtml(item.id)}" ${selectedManualShoppingIds.includes(item.id) ? 'checked' : ''}><span>${escapeHtml(item.name)}</span><small>${item.quantity === undefined ? '' : `${formatQuantity(item.quantity)} ${escapeHtml(item.unit ?? '')} · `}${escapeHtml(item.section)}</small></label>
+                    <button type="button" class="delete-button" data-delete-manual-shopping-item="${escapeHtml(item.id)}">Delete</button>
                   </li>
                 `,
               )
@@ -406,7 +436,6 @@ const renderShoppingItemsView = () => `
       <div class="panel-header"><div><div class="eyebrow">CURRENT LIST</div><h2>Shopping list</h2></div></div>
       <p class="panel-intro">Ingredients and selected regular items for your week.</p>
       ${renderShoppingList()}
-      ${selectedManualShoppingIds.length ? renderManualShoppingItems() : ''}
     </aside>
   </div>
 `
@@ -459,7 +488,6 @@ const render = () => {
                   .join('')}</ul></div>
                 <p class="panel-intro">Ingredients combined from your weekly plan.</p>
                 ${renderShoppingList()}
-                ${selectedManualShoppingIds.length ? renderManualShoppingItems() : ''}
               </aside>
             </div>`
       }
@@ -519,13 +547,42 @@ const bindEvents = () => {
     const input = form.elements.namedItem('item') as HTMLInputElement
     const name = input.value.trim()
     if (!name) return
+    const quantityInput = form.elements.namedItem('quantity') as HTMLInputElement
+    const unitInput = form.elements.namedItem('unit') as HTMLInputElement
+    const quantityValue = quantityInput.value.trim()
+    const quantity = quantityValue ? Number(quantityValue) : undefined
+    if (quantityValue && (quantity === undefined || !Number.isFinite(quantity) || quantity <= 0)) return
+    const unit = unitInput.value.trim()
+    const sectionSelect = form.elements.namedItem('section') as HTMLSelectElement
+    const newSectionInput = form.elements.namedItem('new-section') as HTMLInputElement
+    let section = sectionSelect.value
+    if (section === '__new__') {
+      section = newSectionInput.value.trim()
+      if (!section) return
+      if (!shoppingSections().some((existingSection) => existingSection.toLowerCase() === section.toLowerCase())) {
+        manualShoppingSections = [...manualShoppingSections, section]
+        saveManualShoppingSections()
+      } else {
+        section = shoppingSections().find((existingSection) => existingSection.toLowerCase() === section.toLowerCase())!
+      }
+    }
     const existing = manualShoppingItems.find((item) => item.name.toLowerCase() === name.toLowerCase())
-    const item = existing ?? { id: crypto.randomUUID(), name }
+    const item = existing ?? { id: crypto.randomUUID(), name, section, quantity, unit }
     manualShoppingItems = existing ? manualShoppingItems : [...manualShoppingItems, item]
     if (!selectedManualShoppingIds.includes(item.id)) selectedManualShoppingIds = [...selectedManualShoppingIds, item.id]
     saveManualShoppingItems()
     saveManualShoppingSelection()
     render()
+  })
+  document.querySelector<HTMLSelectElement>('#manual-shopping-section')?.addEventListener('change', (event) => {
+    const select = event.currentTarget as HTMLSelectElement
+    const newSectionInput = document.querySelector<HTMLInputElement>('#manual-shopping-form input[name="new-section"]')
+    const isNewSection = select.value === '__new__'
+    if (newSectionInput) {
+      newSectionInput.hidden = !isNewSection
+      newSectionInput.required = isNewSection
+      if (!isNewSection) newSectionInput.value = ''
+    }
   })
   document.querySelectorAll<HTMLInputElement>('[data-manual-shopping-toggle]').forEach((input) => {
     input.addEventListener('change', () => {
@@ -533,6 +590,16 @@ const bindEvents = () => {
       selectedManualShoppingIds = input.checked
         ? [...selectedManualShoppingIds, itemId]
         : selectedManualShoppingIds.filter((id) => id !== itemId)
+      saveManualShoppingSelection()
+      render()
+    })
+  })
+  document.querySelectorAll<HTMLElement>('[data-delete-manual-shopping-item]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const itemId = button.dataset.deleteManualShoppingItem!
+      manualShoppingItems = manualShoppingItems.filter((item) => item.id !== itemId)
+      selectedManualShoppingIds = selectedManualShoppingIds.filter((id) => id !== itemId)
+      saveManualShoppingItems()
       saveManualShoppingSelection()
       render()
     })

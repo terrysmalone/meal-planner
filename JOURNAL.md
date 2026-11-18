@@ -229,3 +229,15 @@ Replaced the embedded one-off shopping section with a dedicated Shopping items t
 ## 10:57 UTC
 
 Added the current shopping list alongside the reusable-items manager on the Shopping items tab.
+
+## 10:59 UTC
+
+Added persistent sections for manual shopping items. Existing sections can be selected when adding an item, new sections can be created and reused, and selected manual items now appear under their section alongside recipe ingredients in the shopping list and printout.
+
+## 11:01 UTC
+
+Added permanent Delete controls for saved manual shopping items. Deleting an item removes it from the reusable catalog and the current shopping list.
+
+## 11:03 UTC
+
+Extended manual shopping items with optional quantity and unit fields, while preserving existing saved items. Quantities and units now appear consistently in the reusable catalog, shopping list, and printout.
