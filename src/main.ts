@@ -809,7 +809,6 @@ const render = () => {
       <section class="hero">
         <div>
           <div class="week-heading"><button type="button" class="week-nav-button" data-week-previous aria-label="Previous week">←</button><div class="eyebrow">WEEK OF ${selectedWeekLabel().toUpperCase()}</div><button type="button" class="week-nav-button" data-week-next aria-label="Next week">→</button><button type="button" class="outline-button next-week-button" data-default-week>Next week's menu →</button></div>
-          <h1>Give a man a fish and he'll eat for a day.<br><i>Teach him how to fish and he'll eat for life.</i></h1>
           <p>Choose your meals for the week and we’ll take care of the shopping list.</p>
         </div>
         <div class="week-summary"><span class="summary-label">${selectedWeekStart === defaultWeekStart ? 'NEXT WEEK' : 'PLANNED WEEK'}</span><strong>${plannedRecipes.length} <small>meals</small></strong><span>${totalServings} servings planned</span></div>

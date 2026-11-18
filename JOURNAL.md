@@ -345,3 +345,9 @@ Updated `.github/copilot-instructions.md` to require local verification before a
 ## 17:03 UTC
 
 Added a repository instruction to remind the user to rerun `supabase/schema.sql` in the Supabase SQL Editor whenever the schema changes. Changes remain uncommitted and unpushed.
+
+# 2026-11-18
+
+## 17:44 UTC
+
+Removed the fish proverb heading from the hero section to declutter the mobile layout. Files changed: `src/main.ts`, `JOURNAL.md`. Validation: `npm run build`.
