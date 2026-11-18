@@ -293,3 +293,7 @@ Added a clearly labelled “Next week's menu” button beside the weekly navigat
 ## 16:58 UTC
 
 Moved the “Next week's menu” button from the week summary to sit beside the previous/next week controls. Validation: `npm run build`, `npm run build:github-pages`, and `git diff --check`.
+
+## 17:00 UTC
+
+Changed the default planning week to the week after the current Monday-starting week. The “Next week's menu” button now always returns to that default week, while the arrows continue to move one week at a time. Validation: `npm run build`, `npm run build:github-pages`, and `git diff --check`.
