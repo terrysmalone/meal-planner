@@ -91,6 +91,15 @@ h2 { color: #2d4336; font-size: 26px; letter-spacing: -1px; margin-top: 8px; }
 .shopping-items-catalog small { margin-left: auto; color: #98a19b; font-size: 10px; }
 .shopping-items-catalog .delete-button { font-size: 10px; }
 .shopping-group { padding-top: 19px; }
+.hero[hidden] { display: none; }
+.trip-week { margin-bottom: 4px; }
+.trip-list { max-width: 640px; margin: 0 auto; }
+.trip-list .shopping-item { padding: 15px 0; font-size: 16px; }
+.trip-list .shopping-heading h3 { font-size: 13px; }
+.trip-list .shopping-heading span { font-size: 12px; }
+.trip-list .shopping-item strong { font-size: 14px; }
+.trip-list .checkmark { width: 22px; height: 22px; flex: none; }
+.trip-list .empty-state { margin-top: 20px; }
 .shopping-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
 .shopping-heading h3 { font-size: 12px; color: #71916e; text-transform: uppercase; letter-spacing: 1px; }
 .shopping-heading span { color: #adb5ae; font-size: 10px; }
