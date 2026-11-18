@@ -306,6 +306,10 @@ Made reusable shopping-item selections week-specific. Each weekly plan now store
 
 Hardened sign-in initialization against malformed or legacy array-shaped local and Supabase data, including weekly plans, shopping selections, and household relationship results. Validation: `npm run build`, `npm run build:github-pages`, and `git diff --check`.
 
+## 17:14 UTC
+
+Extended backup export/import to include every saved weekly plan, including per-week recipes, servings, and selected shopping-item IDs. Older recipe/shopping backups remain importable, and updated the README. Validation: `npm run build`, `npm run build:github-pages`, and `git diff --check`.
+
 ## 17:02 UTC
 
 Updated `.github/copilot-instructions.md` to require local verification before any commit or push and to prohibit automatic commits or pushes unless explicitly requested. These changes remain uncommitted and unpushed.

@@ -7,9 +7,11 @@ import {
   listRecipes,
   listShoppingItems,
   listShoppingSections,
+  listWeeklyPlans,
   replaceRecipes,
   replaceShoppingItems,
   replaceShoppingSections,
+  replaceWeeklyPlans,
   saveRecipe,
   saveShoppingItem,
   saveShoppingSection,
@@ -18,7 +20,7 @@ import {
   setActiveHousehold,
 } from './recipe-store'
 import type { Household } from './auth'
-import type { Category, Ingredient, ManualShoppingItem, Recipe, WeeklyPlanItem } from './recipe-store'
+import type { Category, Ingredient, ManualShoppingItem, Recipe, WeeklyPlanItem, WeeklyPlanRecord } from './recipe-store'
 import type { User } from '@supabase/supabase-js'
 
 type PlannedRecipe = WeeklyPlanItem
@@ -127,13 +129,35 @@ const saveManualShoppingSelection = () => {
 const mirrorShoppingItems = () => localStorage.setItem(legacyManualShoppingStorageKey, JSON.stringify(manualShoppingItems))
 const mirrorShoppingSections = () => localStorage.setItem(legacyManualShoppingSectionsStorageKey, JSON.stringify(manualShoppingSections))
 
+const localWeeklyPlans = () => {
+  const plans = new Map<string, WeeklyPlanRecord>()
+  Object.keys(localStorage)
+    .filter((key) => key.startsWith(`${storageKey}-`))
+    .forEach((key) => {
+      const weekStart = key.slice(`${storageKey}-`.length)
+      const recipes = parseArray<PlannedRecipe>(localStorage.getItem(key))
+      const selectedShoppingItemIds = parseArray<string>(localStorage.getItem(weekShoppingSelectionStorageKey(weekStart)))
+      plans.set(weekStart, { weekStart, recipes, selectedShoppingItemIds })
+    })
+  return [...plans.values()]
+}
+
+const weeklyPlansForBackup = async () => {
+  const plans = new Map(localWeeklyPlans().map((plan) => [plan.weekStart, plan]))
+  ;(await listWeeklyPlans()).forEach((plan) => plans.set(plan.weekStart, plan))
+  plans.set(selectedWeekStart, { weekStart: selectedWeekStart, recipes: plannedRecipes, selectedShoppingItemIds: selectedManualShoppingIds })
+  return [...plans.values()].sort((first, second) => first.weekStart.localeCompare(second.weekStart))
+}
+
 const exportRecipeBackup = async () => {
+  const weeklyPlans = await weeklyPlansForBackup()
   const contents = JSON.stringify(
     {
       recipes,
       shoppingItems: manualShoppingItems,
       shoppingSections: manualShoppingSections,
       selectedShoppingItemIds: selectedManualShoppingIds,
+      weeklyPlans,
     },
     null,
     2,
@@ -210,11 +234,30 @@ type RecipeBackup = {
   shoppingItems: ManualShoppingItem[]
   shoppingSections: string[]
   selectedShoppingItemIds: string[]
+  weeklyPlans: WeeklyPlanRecord[] | null
 }
+
+const isWeeklyPlanRecords = (value: unknown): value is WeeklyPlanRecord[] =>
+  Array.isArray(value) &&
+  value.every(
+    (plan) =>
+      plan &&
+      typeof plan === 'object' &&
+      typeof (plan as WeeklyPlanRecord).weekStart === 'string' &&
+      Array.isArray((plan as WeeklyPlanRecord).recipes) &&
+      (plan as WeeklyPlanRecord).recipes.every(
+        (recipe) =>
+          recipe &&
+          typeof recipe.recipeId === 'string' &&
+          typeof recipe.servings === 'number',
+      ) &&
+      Array.isArray((plan as WeeklyPlanRecord).selectedShoppingItemIds) &&
+      (plan as WeeklyPlanRecord).selectedShoppingItemIds.every((id) => typeof id === 'string'),
+  )
 
 const parseRecipeBackup = (value: unknown): RecipeBackup | null => {
   if (isRecipeBackup(value)) {
-    return { recipes: value, shoppingItems: manualShoppingItems, shoppingSections: manualShoppingSections, selectedShoppingItemIds: selectedManualShoppingIds }
+    return { recipes: value, shoppingItems: manualShoppingItems, shoppingSections: manualShoppingSections, selectedShoppingItemIds: selectedManualShoppingIds, weeklyPlans: null }
   }
   if (!value || typeof value !== 'object') return null
   const backup = value as Partial<RecipeBackup>
@@ -224,7 +267,8 @@ const parseRecipeBackup = (value: unknown): RecipeBackup | null => {
     !Array.isArray(backup.shoppingSections) ||
     !backup.shoppingSections.every((section) => typeof section === 'string') ||
     !Array.isArray(backup.selectedShoppingItemIds) ||
-    !backup.selectedShoppingItemIds.every((id) => typeof id === 'string')
+    !backup.selectedShoppingItemIds.every((id) => typeof id === 'string') ||
+    (backup.weeklyPlans !== undefined && !isWeeklyPlanRecords(backup.weeklyPlans))
   ) {
     return null
   }
@@ -233,6 +277,7 @@ const parseRecipeBackup = (value: unknown): RecipeBackup | null => {
     shoppingItems: backup.shoppingItems,
     shoppingSections: backup.shoppingSections,
     selectedShoppingItemIds: backup.selectedShoppingItemIds,
+    weeklyPlans: backup.weeklyPlans ?? null,
   }
 }
 
@@ -244,10 +289,23 @@ const importRecipeBackup = async (file: File) => {
     await replaceRecipes(backup.recipes)
     await replaceShoppingItems(backup.shoppingItems)
     await replaceShoppingSections(backup.shoppingSections)
+    if (backup.weeklyPlans) {
+      await replaceWeeklyPlans(backup.weeklyPlans)
+      Object.keys(localStorage)
+        .filter((key) => key.startsWith(`${storageKey}-`) || key.startsWith(`${manualShoppingSelectionStorageKey}-`))
+        .forEach((key) => localStorage.removeItem(key))
+      backup.weeklyPlans.forEach((plan) => {
+        localStorage.setItem(weekStorageKey(plan.weekStart), JSON.stringify(plan.recipes))
+        localStorage.setItem(weekShoppingSelectionStorageKey(plan.weekStart), JSON.stringify(plan.selectedShoppingItemIds))
+      })
+    }
     recipes = backup.recipes
     manualShoppingItems = backup.shoppingItems
     manualShoppingSections = backup.shoppingSections
-    selectedManualShoppingIds = backup.selectedShoppingItemIds.filter((id) => manualShoppingItems.some((item) => item.id === id))
+    const importedWeek = backup.weeklyPlans?.find((plan) => plan.weekStart === selectedWeekStart)
+    plannedRecipes = importedWeek?.recipes ?? (backup.weeklyPlans ? [] : plannedRecipes)
+    selectedManualShoppingIds = (importedWeek?.selectedShoppingItemIds ?? backup.selectedShoppingItemIds)
+      .filter((id) => manualShoppingItems.some((item) => item.id === id))
     mirrorShoppingItems()
     mirrorShoppingSections()
     saveManualShoppingSelection()
