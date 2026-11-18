@@ -310,6 +310,22 @@ Hardened sign-in initialization against malformed or legacy array-shaped local a
 
 Extended backup export/import to include every saved weekly plan, including per-week recipes, servings, and selected shopping-item IDs. Older recipe/shopping backups remain importable, and updated the README. Validation: `npm run build`, `npm run build:github-pages`, and `git diff --check`.
 
+## 17:16 UTC
+
+Added the photographed Gousto recipe “Smoky Chicken & Mushroom Spaghetti” to the starter recipe collection with its visible two-serving ingredients and 30-minute cooking time. The card did not include method text. Validation: `npm run build`, `npm run build:github-pages`, and `git diff --check`.
+
+## 17:18 UTC
+
+Added additive recipe-only imports: importing a JSON array of recipes now merges them by ID without replacing existing recipes, shopping data, or weekly plans. Added a standalone JSON file for the photographed recipe. Full backup objects retain their existing replacement behavior. Validation: `npm run build`, `npm run build:github-pages`, and `git diff --check`.
+
+## 17:21 UTC
+
+Added recipe-only import files and starter entries for “Chicken Fajita Tray Bake With Crème Fraîche & Tomato Salsa” and “Oven Baked Cheesy Mushroom & Lentil Lasagne.” Ingredients were transcribed from the supplied cards. Validation: `npm run build`, `npm run build:github-pages`, and `git diff --check`.
+
+## 17:24 UTC
+
+Removed all standalone recipe import files at the user's request before pushing the recipe and additive-import changes.
+
 ## 17:02 UTC
 
 Updated `.github/copilot-instructions.md` to require local verification before any commit or push and to prohibit automatic commits or pushes unless explicitly requested. These changes remain uncommitted and unpushed.

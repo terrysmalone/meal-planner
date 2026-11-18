@@ -74,6 +74,53 @@ const chickenFajitaTrayBake: Recipe = {
   ],
 }
 
+const chickenFajitaCremeFraicheTrayBake: Recipe = {
+  id: 'chicken-fajita-creme-fraiche-tray-bake',
+  name: 'Chicken Fajita Tray Bake With Crème Fraîche & Tomato Salsa',
+  description: 'A fajita-style chicken tray bake with peppers, tortillas, crème fraîche, and tomato salsa.',
+  time: 35,
+  servings: 2,
+  tags: ['Chicken', 'One pot', '30 min'],
+  ingredients: [
+    { name: 'Cayenne pepper', quantity: 0.5, unit: 'tsp', category: 'Pantry' },
+    { name: 'Cheddar cheese', quantity: 40, unit: 'g', category: 'Dairy' },
+    { name: 'Chicken breast strips', quantity: 250, unit: 'g', category: 'Protein' },
+    { name: 'Cumin', quantity: 1, unit: 'tsp', category: 'Pantry' },
+    { name: 'Crème fraîche', quantity: 80, unit: 'g', category: 'Dairy' },
+    { name: 'Garlic clove', quantity: 2, unit: '', category: 'Produce' },
+    { name: 'Ground coriander', quantity: 1, unit: 'tsp', category: 'Pantry' },
+    { name: 'Ground cumin', quantity: 1, unit: 'tsp', category: 'Pantry' },
+    { name: 'Ground smoked paprika', quantity: 2, unit: 'tsp', category: 'Pantry' },
+    { name: 'Plain tortillas', quantity: 6, unit: '', category: 'Pantry' },
+    { name: 'Red onion', quantity: 1, unit: '', category: 'Produce' },
+    { name: 'Spring onion', quantity: 1, unit: '', category: 'Produce' },
+    { name: 'Tomato', quantity: 1, unit: '', category: 'Produce' },
+    { name: 'Yellow pepper', quantity: 1, unit: '', category: 'Produce' },
+  ],
+}
+
+const ovenBakedCheesyMushroomLentilLasagne: Recipe = {
+  id: 'oven-baked-cheesy-mushroom-lentil-lasagne',
+  name: 'Oven Baked Cheesy Mushroom & Lentil Lasagne',
+  description: 'A cheesy vegetarian lasagne with mushrooms, lentils, and tomato sauce.',
+  time: 45,
+  servings: 2,
+  tags: ['Vegetarian', 'One pot'],
+  ingredients: [
+    { name: 'Cheddar cheese', quantity: 80, unit: 'g', category: 'Dairy' },
+    { name: 'Cornflour', quantity: 1, unit: 'tbsp', category: 'Pantry' },
+    { name: 'Dried oregano', quantity: 1, unit: 'tbsp', category: 'Pantry' },
+    { name: 'Finely chopped tomatoes', quantity: 200, unit: 'g', category: 'Produce' },
+    { name: 'Garlic clove', quantity: 2, unit: '', category: 'Produce' },
+    { name: 'Lentils', quantity: 185, unit: 'g', category: 'Pantry' },
+    { name: 'Lasagne sheets', quantity: 120, unit: 'g', category: 'Pantry' },
+    { name: 'Red wine paste', quantity: 10, unit: 'g', category: 'Pantry' },
+    { name: 'Vegetable stock mix', quantity: 5.5, unit: 'g', category: 'Pantry' },
+    { name: 'Vegetable stock mix (intense)', quantity: 5.5, unit: 'g', category: 'Pantry' },
+    { name: 'White cup mushrooms', quantity: 160, unit: 'g', category: 'Produce' },
+  ],
+}
+
 const chorizoSpaghetti: Recipe = {
   id: 'chorizo-tomato-tenderstem-spaghetti',
   name: 'Chorizo, Tomato & Tenderstem Spaghetti',
@@ -303,6 +350,28 @@ const truffleCacioPepeRavioli: Recipe = {
   ],
 }
 
+const smokyChickenMushroomSpaghetti: Recipe = {
+  id: 'smoky-chicken-mushroom-spaghetti',
+  name: 'Smoky Chicken & Mushroom Spaghetti',
+  description: 'Smoky chicken and mushrooms with creamy mustard spaghetti.',
+  time: 30,
+  servings: 2,
+  tags: ['Chicken', 'Pasta', '30 min'],
+  ingredients: [
+    { name: 'Chicken breast strips', quantity: 250, unit: 'g', category: 'Protein' },
+    { name: 'Chicken stock', quantity: 1, unit: '', category: 'Pantry' },
+    { name: 'Dijon mustard', quantity: 5.5, unit: 'g', category: 'Pantry' },
+    { name: 'Dried chilli flakes', quantity: 0.5, unit: 'tsp', category: 'Pantry' },
+    { name: 'Garlic clove', quantity: 1, unit: '', category: 'Produce' },
+    { name: 'Ground smoked paprika', quantity: 1, unit: 'tsp', category: 'Pantry' },
+    { name: 'Onion', quantity: 1, unit: '', category: 'Produce' },
+    { name: 'Parsley', quantity: 10, unit: 'g', category: 'Produce' },
+    { name: 'Soft cheese', quantity: 80, unit: 'g', category: 'Dairy' },
+    { name: 'White cup mushrooms', quantity: 80, unit: 'g', category: 'Produce' },
+    { name: 'Wholewheat spaghetti', quantity: 190, unit: 'g', category: 'Pantry' },
+  ],
+}
+
 export const starterRecipes: Recipe[] = [
   {
     id: 'peri-peri-halloumi-rice',
@@ -322,6 +391,8 @@ export const starterRecipes: Recipe[] = [
       { name: 'Sriracha or chilli sauce', quantity: 12, unit: 'ml', category: 'Pantry' },
     ],
   },
+  chickenFajitaCremeFraicheTrayBake,
+  ovenBakedCheesyMushroomLentilLasagne,
   chickenFajitaTrayBake,
   chorizoSpaghetti,
   cheesyMexicanRice,
@@ -334,6 +405,7 @@ export const starterRecipes: Recipe[] = [
   herbyChickenLeekMash,
   cheesyBlackBeanEnchiladas,
   truffleCacioPepeRavioli,
+  smokyChickenMushroomSpaghetti,
 ]
 
 let databasePromise: Promise<IDBDatabase> | undefined

@@ -286,9 +286,21 @@ const importRecipeBackup = async (file: File) => {
     const data: unknown = JSON.parse(await file.text())
     const backup = parseRecipeBackup(data)
     if (!backup) throw new Error('This file is not a valid recipes.json backup.')
-    await replaceRecipes(backup.recipes)
-    await replaceShoppingItems(backup.shoppingItems)
-    await replaceShoppingSections(backup.shoppingSections)
+    const recipeOnlyImport = Array.isArray(data)
+    if (recipeOnlyImport) {
+      const existingRecipes = await listRecipes()
+      const recipesById = new Map(existingRecipes.map((recipe) => [recipe.id, recipe]))
+      backup.recipes.forEach((recipe) => recipesById.set(recipe.id, recipe))
+      recipes = [...recipesById.values()]
+      await replaceRecipes(recipes)
+    } else {
+      await replaceRecipes(backup.recipes)
+      recipes = backup.recipes
+    }
+    if (!recipeOnlyImport) {
+      await replaceShoppingItems(backup.shoppingItems)
+      await replaceShoppingSections(backup.shoppingSections)
+    }
     if (backup.weeklyPlans) {
       await replaceWeeklyPlans(backup.weeklyPlans)
       Object.keys(localStorage)
@@ -299,9 +311,10 @@ const importRecipeBackup = async (file: File) => {
         localStorage.setItem(weekShoppingSelectionStorageKey(plan.weekStart), JSON.stringify(plan.selectedShoppingItemIds))
       })
     }
-    recipes = backup.recipes
-    manualShoppingItems = backup.shoppingItems
-    manualShoppingSections = backup.shoppingSections
+    if (!recipeOnlyImport) {
+      manualShoppingItems = backup.shoppingItems
+      manualShoppingSections = backup.shoppingSections
+    }
     const importedWeek = backup.weeklyPlans?.find((plan) => plan.weekStart === selectedWeekStart)
     plannedRecipes = importedWeek?.recipes ?? (backup.weeklyPlans ? [] : plannedRecipes)
     selectedManualShoppingIds = (importedWeek?.selectedShoppingItemIds ?? backup.selectedShoppingItemIds)
