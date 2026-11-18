@@ -253,3 +253,19 @@ Moved reusable shopping items and custom shopping sections into IndexedDB alongs
 ## 15:05 UTC
 
 Mirrored reusable shopping items and custom sections into localStorage as well as IndexedDB, and extended recipe backup import/export to include the shopping catalog, sections, and selected manual items.
+
+## 15:36 UTC
+
+Documented the planned free hosted setup in `README.md`, including the Supabase organization, database password, Data API, automatic table access, and automatic RLS choices. Noted that GitHub Pages deployment will be documented when added. No application behavior changed. Validation: `git diff --check`.
+
+## 15:38 UTC
+
+Installed the Supabase JavaScript client and added environment-based Supabase configuration. Added `.env.example`, a local ignored `.env.local` containing the supplied project credentials, and the reusable `src/supabase.ts` client module. Updated `package.json` and `package-lock.json`. Validation: `npm run build` and `git diff --check`.
+
+## 15:44 UTC
+
+Added authenticated Supabase household sharing. Created `supabase/schema.sql` with household membership, recipe/shopping tables, RPC helpers, and RLS policies; added email/password authentication, household creation/joining, sign-out UI, remote synchronization, and offline IndexedDB fallback. Updated the README with setup steps and corrected the dependency manifest. Validation: `npm run build` and `git diff --check`.
+
+## 16:23 UTC
+
+Added GitHub Pages deployment configuration with a repository-path-aware Vite build, a GitHub Actions workflow for Pages, and documentation for the required repository variables and Supabase redirect URL. Added a dedicated Pages build script after verifying npm argument forwarding. Validation: `npm run build`, `npm run build:github-pages`, and `git diff --check`.

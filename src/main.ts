@@ -1,4 +1,5 @@
 import './style.css'
+import { createHousehold, getSession, joinHousehold, listHouseholds, signIn, signOut, signUp } from './auth'
 import {
   deleteRecipe,
   deleteShoppingItem,
@@ -12,8 +13,11 @@ import {
   saveRecipe,
   saveShoppingItem,
   saveShoppingSection,
+  setActiveHousehold,
 } from './recipe-store'
+import type { Household } from './auth'
 import type { Category, Ingredient, ManualShoppingItem, Recipe } from './recipe-store'
+import type { User } from '@supabase/supabase-js'
 
 type PlannedRecipe = {
   recipeId: string
@@ -73,6 +77,10 @@ let viewingRecipeId: string | null = null
 let editingRecipeId: string | null = null
 let isAccountMenuOpen = false
 let recipeSearchTerm = ''
+let currentUser: User | null = null
+let currentHousehold: Household | null = null
+let authMode: 'sign-in' | 'sign-up' = 'sign-in'
+let authError = ''
 
 const app = document.querySelector<HTMLDivElement>('#app')!
 
@@ -504,6 +512,109 @@ const renderShoppingItemsView = () => `
   </div>
 `
 
+const renderAuthScreen = () => {
+  app.innerHTML = `
+    <main class="auth-shell">
+      <section class="auth-card">
+        <div class="eyebrow">OPERATION FISH FOR LIFE</div>
+        <h1>${authMode === 'sign-in' ? 'Welcome back' : 'Create your account'}</h1>
+        <p>${authMode === 'sign-in' ? 'Sign in to access your household meal planner.' : 'Create an account to sync your planner across devices.'}</p>
+        ${authError ? `<p class="form-error">${escapeHtml(authError)}</p>` : ''}
+        <form id="auth-form">
+          <label>Email<input name="email" type="email" autocomplete="email" required></label>
+          <label>Password<input name="password" type="password" minlength="8" autocomplete="${authMode === 'sign-in' ? 'current-password' : 'new-password'}" required></label>
+          <button type="submit" class="outline-button">${authMode === 'sign-in' ? 'Sign in' : 'Create account'}</button>
+        </form>
+        <button type="button" class="text-button" data-toggle-auth>
+          ${authMode === 'sign-in' ? 'Need an account? Create one' : 'Already have an account? Sign in'}
+        </button>
+      </section>
+    </main>
+  `
+  document.querySelector<HTMLFormElement>('#auth-form')?.addEventListener('submit', async (event) => {
+    event.preventDefault()
+    const form = event.currentTarget as HTMLFormElement
+    const email = (form.elements.namedItem('email') as HTMLInputElement).value.trim()
+    const password = (form.elements.namedItem('password') as HTMLInputElement).value
+    authError = ''
+    try {
+      if (authMode === 'sign-in') {
+        await signIn(email, password)
+        await startApp()
+      } else {
+        const result = await signUp(email, password)
+        if (!result.session) {
+          authError = 'Account created. Check your email to confirm it, then sign in.'
+          renderAuthScreen()
+        } else {
+          await startApp()
+        }
+      }
+    } catch (error) {
+      authError = error instanceof Error ? error.message : 'Unable to authenticate.'
+      renderAuthScreen()
+    }
+  })
+  document.querySelector<HTMLElement>('[data-toggle-auth]')?.addEventListener('click', () => {
+    authMode = authMode === 'sign-in' ? 'sign-up' : 'sign-in'
+    authError = ''
+    renderAuthScreen()
+  })
+}
+
+const renderHouseholdSetup = () => {
+  app.innerHTML = `
+    <main class="auth-shell">
+      <section class="auth-card">
+        <div class="eyebrow">HOUSEHOLD SETUP</div>
+        <h1>Connect your household</h1>
+        <p>Create a household or join one using an invite code. Household members share recipes, plans, and shopping items.</p>
+        ${authError ? `<p class="form-error">${escapeHtml(authError)}</p>` : ''}
+        <form id="create-household-form">
+          <label>New household name<input name="name" placeholder="The Malone household" required></label>
+          <button type="submit" class="outline-button">Create household</button>
+        </form>
+        <div class="auth-divider">OR</div>
+        <form id="join-household-form">
+          <label>Invite code<input name="code" autocapitalize="characters" placeholder="AB12CD34EF" required></label>
+          <button type="submit" class="outline-button">Join household</button>
+        </form>
+        <button type="button" class="text-button" data-sign-out>Sign out</button>
+      </section>
+    </main>
+  `
+  document.querySelector<HTMLFormElement>('#create-household-form')?.addEventListener('submit', async (event) => {
+    event.preventDefault()
+    const form = event.currentTarget as HTMLFormElement
+    const name = ((form.elements.namedItem('name') as HTMLInputElement).value).trim()
+    authError = ''
+    try {
+      await createHousehold(name)
+      await startApp()
+    } catch (error) {
+      authError = error instanceof Error ? error.message : 'Unable to create the household.'
+      renderHouseholdSetup()
+    }
+  })
+  document.querySelector<HTMLFormElement>('#join-household-form')?.addEventListener('submit', async (event) => {
+    event.preventDefault()
+    const form = event.currentTarget as HTMLFormElement
+    const code = ((form.elements.namedItem('code') as HTMLInputElement).value).trim()
+    authError = ''
+    try {
+      await joinHousehold(code)
+      await startApp()
+    } catch (error) {
+      authError = error instanceof Error ? error.message : 'Unable to join the household.'
+      renderHouseholdSetup()
+    }
+  })
+  document.querySelector<HTMLElement>('[data-sign-out]')?.addEventListener('click', async () => {
+    await signOut()
+    await startApp()
+  })
+}
+
 const render = () => {
   const totalServings = plannedRecipes.reduce((total, item) => total + item.servings, 0)
   app.innerHTML = `
@@ -514,7 +625,7 @@ const render = () => {
         <button class="${activeView === 'recipes' ? 'active' : ''}" data-view="recipes">My recipes</button>
         <button class="${activeView === 'shopping' ? 'active' : ''}" data-view="shopping">Shopping items</button>
       </nav>
-      <div class="topbar-actions"><div class="account-menu"><button type="button" class="avatar" data-account-menu aria-haspopup="menu" aria-expanded="${isAccountMenuOpen}">TM</button><div class="account-dropdown ${isAccountMenuOpen ? 'is-open' : ''}" role="menu"><div class="account-label">ACCOUNT</div><button type="button" class="dropdown-action" data-export-recipes>Export backup</button><label class="dropdown-action">Import backup<input id="recipe-backup" type="file" accept=".json,application/json"></label></div></div></div>
+      <div class="topbar-actions"><div class="account-menu"><button type="button" class="avatar" data-account-menu aria-haspopup="menu" aria-expanded="${isAccountMenuOpen}">${escapeHtml((currentUser?.email?.charAt(0) ?? 'U').toUpperCase())}</button><div class="account-dropdown ${isAccountMenuOpen ? 'is-open' : ''}" role="menu"><div class="account-label">${escapeHtml(currentUser?.email ?? 'ACCOUNT')}</div><div class="account-label">${escapeHtml(currentHousehold?.name ?? '')} · ${escapeHtml(currentHousehold?.invite_code ?? '')}</div><button type="button" class="dropdown-action" data-export-recipes>Export backup</button><label class="dropdown-action">Import backup<input id="recipe-backup" type="file" accept=".json,application/json"></label><button type="button" class="dropdown-action" data-sign-out>Sign out</button></div></div></div>
     </header>
     <main>
       <section class="hero">
@@ -682,6 +793,10 @@ const bindEvents = () => {
     button?.setAttribute('aria-expanded', String(isAccountMenuOpen))
     dropdown?.classList.toggle('is-open', isAccountMenuOpen)
   })
+  document.querySelector<HTMLButtonElement>('[data-sign-out]')?.addEventListener('click', async () => {
+    await signOut()
+    await startApp()
+  })
   document.querySelectorAll<HTMLElement>('[data-view-recipe]').forEach((button) => {
   button.addEventListener('click', () => {
     viewingRecipeId = button.dataset.viewRecipe!
@@ -755,7 +870,7 @@ const bindEvents = () => {
   })
 }
 
-const startApp = async () => {
+const loadHouseholdData = async () => {
   recipes = await initializeRecipes()
   const storedShoppingItems = await listShoppingItems()
   if (!storedShoppingItems.length && legacyManualShoppingItems.length) {
@@ -780,6 +895,33 @@ const startApp = async () => {
     savePlan()
   }
   render()
+}
+
+const startApp = async () => {
+  try {
+    const session = await getSession()
+    if (!session) {
+      currentUser = null
+      currentHousehold = null
+      setActiveHousehold(null)
+      renderAuthScreen()
+      return
+    }
+    currentUser = session.user
+    const households = await listHouseholds(currentUser)
+    if (!households.length) {
+      currentHousehold = null
+      setActiveHousehold(null)
+      renderHouseholdSetup()
+      return
+    }
+    currentHousehold = households[0]
+    setActiveHousehold(currentHousehold.id)
+    await loadHouseholdData()
+  } catch (error) {
+    authError = error instanceof Error ? error.message : 'Unable to load the account.'
+    renderAuthScreen()
+  }
 }
 
 void startApp()
