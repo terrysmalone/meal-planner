@@ -269,3 +269,7 @@ Added authenticated Supabase household sharing. Created `supabase/schema.sql` wi
 ## 16:23 UTC
 
 Added GitHub Pages deployment configuration with a repository-path-aware Vite build, a GitHub Actions workflow for Pages, and documentation for the required repository variables and Supabase redirect URL. Added a dedicated Pages build script after verifying npm argument forwarding. Validation: `npm run build`, `npm run build:github-pages`, and `git diff --check`.
+
+## 16:31 UTC
+
+Made the repository public to enable free GitHub Pages hosting, configured the Pages environment for the deployment branch, and verified the live app at `https://terrysmalone.github.io/meal-planner/`. The deployment workflow completed successfully.
