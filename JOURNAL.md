@@ -288,4 +288,8 @@ Added Monday-based previous/next week navigation and per-household weekly plan p
 
 ## 16:54 UTC
 
-Added a clearly labelled “Next week's menu” button to the weekly plan hero while retaining the arrow navigation. Validation: `npm run build`, `npm run build:github-pages`, and `git diff --check`.
+Added a clearly labelled “Next week's menu” button beside the weekly navigation arrows while retaining the arrow navigation. Validation: `npm run build`, `npm run build:github-pages`, and `git diff --check`.
+
+## 16:58 UTC
+
+Moved the “Next week's menu” button from the week summary to sit beside the previous/next week controls. Validation: `npm run build`, `npm run build:github-pages`, and `git diff --check`.
