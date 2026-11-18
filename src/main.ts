@@ -68,6 +68,7 @@ defaultWeekDate.setDate(defaultWeekDate.getDate() + 7)
 const defaultWeekStart = dateKey(defaultWeekDate)
 let selectedWeekStart = defaultWeekStart
 const weekStorageKey = (weekStart: string) => `${storageKey}-${weekStart}`
+const weekShoppingSelectionStorageKey = (weekStart: string) => `${manualShoppingSelectionStorageKey}-${weekStart}`
 const savedPlan = localStorage.getItem(weekStorageKey(selectedWeekStart)) ?? localStorage.getItem(storageKey)
 const savedManualShoppingItems = localStorage.getItem(legacyManualShoppingStorageKey)
 const savedManualShoppingSelection = localStorage.getItem(manualShoppingSelectionStorageKey)
@@ -96,6 +97,7 @@ let isAccountMenuOpen = false
 let recipeSearchTerm = ''
 let currentUser: User | null = null
 let currentHousehold: Household | null = null
+let loadedWeeklyPlanFromRemote = false
 let authMode: 'sign-in' | 'sign-up' = 'sign-in'
 let authError = ''
 
@@ -105,9 +107,14 @@ const savePlan = async () => {
   localStorage.setItem(weekStorageKey(selectedWeekStart), JSON.stringify(plannedRecipes))
   localStorage.setItem(selectedWeekStorageKey, selectedWeekStart)
   if (selectedWeekStart === defaultWeekStart) localStorage.setItem(storageKey, JSON.stringify(plannedRecipes))
-  await saveWeeklyPlan(selectedWeekStart, plannedRecipes)
+  await saveWeeklyPlan(selectedWeekStart, { recipes: plannedRecipes, selectedShoppingItemIds: selectedManualShoppingIds })
 }
-const saveManualShoppingSelection = () => localStorage.setItem(manualShoppingSelectionStorageKey, JSON.stringify(selectedManualShoppingIds))
+const saveManualShoppingSelection = () => {
+  const serializedSelection = JSON.stringify(selectedManualShoppingIds)
+  localStorage.setItem(manualShoppingSelectionStorageKey, serializedSelection)
+  localStorage.setItem(weekShoppingSelectionStorageKey(selectedWeekStart), serializedSelection)
+  void savePlan()
+}
 const mirrorShoppingItems = () => localStorage.setItem(legacyManualShoppingStorageKey, JSON.stringify(manualShoppingItems))
 const mirrorShoppingSections = () => localStorage.setItem(legacyManualShoppingSectionsStorageKey, JSON.stringify(manualShoppingSections))
 
@@ -264,11 +271,21 @@ const loadSelectedWeekPlan = async () => {
   const savedLocalPlan = localStorage.getItem(weekStorageKey(selectedWeekStart))
     ?? (selectedWeekStart === defaultWeekStart ? localStorage.getItem(storageKey) : null)
   const localPlan: PlannedRecipe[] = savedLocalPlan ? JSON.parse(savedLocalPlan) : []
+  const savedLocalSelection = localStorage.getItem(weekShoppingSelectionStorageKey(selectedWeekStart))
+    ?? (selectedWeekStart === defaultWeekStart ? localStorage.getItem(manualShoppingSelectionStorageKey) : null)
+  const localSelection: string[] = savedLocalSelection ? JSON.parse(savedLocalSelection) : []
   const remotePlan = await loadWeeklyPlan(selectedWeekStart)
-  plannedRecipes = remotePlan ?? localPlan
+  loadedWeeklyPlanFromRemote = remotePlan !== null
+  plannedRecipes = remotePlan?.recipes ?? localPlan
+  if (remotePlan) selectedManualShoppingIds = remotePlan.selectedShoppingItemIds
+  else selectedManualShoppingIds = localSelection
   localStorage.setItem(weekStorageKey(selectedWeekStart), JSON.stringify(plannedRecipes))
   if (selectedWeekStart === defaultWeekStart) localStorage.setItem(storageKey, JSON.stringify(plannedRecipes))
-  if (remotePlan === null && localPlan.length) await saveWeeklyPlan(selectedWeekStart, localPlan)
+  localStorage.setItem(weekShoppingSelectionStorageKey(selectedWeekStart), JSON.stringify(selectedManualShoppingIds))
+  if (selectedWeekStart === defaultWeekStart) localStorage.setItem(manualShoppingSelectionStorageKey, JSON.stringify(selectedManualShoppingIds))
+  if (remotePlan === null && (localPlan.length || localSelection.length)) {
+    await saveWeeklyPlan(selectedWeekStart, { recipes: localPlan, selectedShoppingItemIds: localSelection })
+  }
 }
 
 const changeSelectedWeek = async (offset: number) => {
@@ -929,12 +946,13 @@ const loadHouseholdData = async () => {
     await Promise.all(legacyManualShoppingItems.map((item) => saveShoppingItem(item)))
   }
   manualShoppingItems = await listShoppingItems()
+  selectedManualShoppingIds = selectedManualShoppingIds.filter((id) => manualShoppingItems.some((item) => item.id === id))
   const storedShoppingSections = await listShoppingSections()
   if (!storedShoppingSections.length && manualShoppingSections.length) {
     await Promise.all(manualShoppingSections.map((section) => saveShoppingSection(section)))
   }
   manualShoppingSections = await listShoppingSections()
-  if (!savedManualShoppingSelection && legacyManualShoppingItems.length) {
+  if (!loadedWeeklyPlanFromRemote && !savedManualShoppingSelection && legacyManualShoppingItems.length) {
     selectedManualShoppingIds = legacyManualShoppingItems.map((item) => item.id)
     saveManualShoppingSelection()
   }

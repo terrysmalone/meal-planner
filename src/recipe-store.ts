@@ -32,6 +32,11 @@ export type WeeklyPlanItem = {
   servings: number
 }
 
+export type WeeklyPlan = {
+  recipes: WeeklyPlanItem[]
+  selectedShoppingItemIds: string[]
+}
+
 const databaseName = 'operation-fish-for-life'
 const databaseVersion = 16
 const recipeStoreName = 'recipes'
@@ -640,7 +645,7 @@ export const replaceShoppingSections = async (sections: string[]) => {
   }
 }
 
-export const loadWeeklyPlan = async (weekStart: string) => {
+export const loadWeeklyPlan = async (weekStart: string): Promise<WeeklyPlan | null> => {
   if (!activeHouseholdId) return null
   try {
     const { data, error } = await supabase
@@ -650,14 +655,20 @@ export const loadWeeklyPlan = async (weekStart: string) => {
       .eq('week_start', weekStart)
       .maybeSingle()
     if (error) throw error
-    return data ? data.data as WeeklyPlanItem[] : null
+    if (!data) return null
+    if (Array.isArray(data.data)) return { recipes: data.data as WeeklyPlanItem[], selectedShoppingItemIds: [] }
+    const savedPlan = data.data as Partial<WeeklyPlan>
+    return {
+      recipes: Array.isArray(savedPlan.recipes) ? savedPlan.recipes : [],
+      selectedShoppingItemIds: Array.isArray(savedPlan.selectedShoppingItemIds) ? savedPlan.selectedShoppingItemIds : [],
+    }
   } catch (error) {
     reportRemoteFailure('weekly plan loading', error)
     return null
   }
 }
 
-export const saveWeeklyPlan = async (weekStart: string, plan: WeeklyPlanItem[]) => {
+export const saveWeeklyPlan = async (weekStart: string, plan: WeeklyPlan) => {
   await syncRemote(
     () => supabase.from('weekly_plans').upsert({ household_id: activeHouseholdId, week_start: weekStart, data: plan }),
     'weekly plan save',

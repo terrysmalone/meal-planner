@@ -297,3 +297,15 @@ Moved the “Next week's menu” button from the week summary to sit beside the 
 ## 17:00 UTC
 
 Changed the default planning week to the week after the current Monday-starting week. The “Next week's menu” button now always returns to that default week, while the arrows continue to move one week at a time. Validation: `npm run build`, `npm run build:github-pages`, and `git diff --check`.
+
+## 17:06 UTC
+
+Made reusable shopping-item selections week-specific. Each weekly plan now stores its selected shopping item IDs alongside recipe selections, with local storage and Supabase persistence and compatibility for older recipe-only plan records. Updated the README. Validation pending.
+
+## 17:02 UTC
+
+Updated `.github/copilot-instructions.md` to require local verification before any commit or push and to prohibit automatic commits or pushes unless explicitly requested. These changes remain uncommitted and unpushed.
+
+## 17:03 UTC
+
+Added a repository instruction to remind the user to rerun `supabase/schema.sql` in the Supabase SQL Editor whenever the schema changes. Changes remain uncommitted and unpushed.
