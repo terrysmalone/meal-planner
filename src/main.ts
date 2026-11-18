@@ -7,6 +7,11 @@ type PlannedRecipe = {
   servings: number
 }
 
+type ManualShoppingItem = {
+  id: string
+  name: string
+}
+
 type IngredientConflict = {
   name: string
   units: Array<{ label: string; recipeIds: string[] }>
@@ -24,10 +29,18 @@ type SaveFilePickerWindow = Window & {
 }
 
 const storageKey = 'meal-planner-plan'
+const manualShoppingStorageKey = 'meal-planner-shopping-items'
+const manualShoppingSelectionStorageKey = 'meal-planner-selected-shopping-items'
 const savedPlan = localStorage.getItem(storageKey)
+const savedManualShoppingItems = localStorage.getItem(manualShoppingStorageKey)
+const savedManualShoppingSelection = localStorage.getItem(manualShoppingSelectionStorageKey)
 let recipes: Recipe[] = []
 let plannedRecipes: PlannedRecipe[] = savedPlan ? JSON.parse(savedPlan) : []
-let activeView: 'plan' | 'recipes' = 'plan'
+let manualShoppingItems: ManualShoppingItem[] = savedManualShoppingItems ? JSON.parse(savedManualShoppingItems) : []
+let selectedManualShoppingIds: string[] = savedManualShoppingSelection
+  ? JSON.parse(savedManualShoppingSelection)
+  : manualShoppingItems.map((item) => item.id)
+let activeView: 'plan' | 'recipes' | 'shopping' = 'plan'
 let isRecipeFormOpen = false
 let viewingRecipeId: string | null = null
 let editingRecipeId: string | null = null
@@ -37,6 +50,9 @@ let recipeSearchTerm = ''
 const app = document.querySelector<HTMLDivElement>('#app')!
 
 const savePlan = () => localStorage.setItem(storageKey, JSON.stringify(plannedRecipes))
+const saveManualShoppingItems = () => localStorage.setItem(manualShoppingStorageKey, JSON.stringify(manualShoppingItems))
+const saveManualShoppingSelection = () =>
+  localStorage.setItem(manualShoppingSelectionStorageKey, JSON.stringify(selectedManualShoppingIds))
 
 const exportRecipeBackup = async () => {
   const contents = JSON.stringify(recipes, null, 2)
@@ -351,6 +367,50 @@ const renderShoppingList = () => {
     .join('')}`
 }
 
+const renderManualShoppingItems = () => `
+  <section class="manual-shopping">
+    <div class="shopping-heading"><h3>One-off items</h3><span>${selectedManualShoppingIds.length} items</span></div>
+    <ul class="manual-shopping-list">${manualShoppingItems
+      .filter((item) => selectedManualShoppingIds.includes(item.id))
+      .map((item) => `<li class="manual-shopping-item"><span>${escapeHtml(item.name)}</span></li>`)
+      .join('')}</ul>
+  </section>
+`
+
+const renderShoppingItemsView = () => `
+  <section class="section-header">
+    <div><div class="eyebrow">REUSABLE ITEMS</div><h2>Shopping items</h2></div>
+  </section>
+  <div class="shopping-items-layout">
+    <section class="shopping-items-manager">
+      <p class="panel-intro">Add regular items once, then select them whenever you need them on your shopping list.</p>
+      <form class="manual-shopping-form" id="manual-shopping-form">
+        <input name="item" type="text" placeholder="Milk, bread, ready meals..." aria-label="Shopping item" required>
+        <button type="submit" class="outline-button">Add item</button>
+      </form>
+      ${
+        manualShoppingItems.length
+          ? `<ul class="shopping-items-catalog">${manualShoppingItems
+              .map(
+                (item) => `
+                  <li>
+                    <label><input type="checkbox" data-manual-shopping-toggle="${escapeHtml(item.id)}" ${selectedManualShoppingIds.includes(item.id) ? 'checked' : ''}><span>${escapeHtml(item.name)}</span></label>
+                  </li>
+                `,
+              )
+              .join('')}</ul>`
+          : '<div class="empty-state"><span class="empty-icon">✦</span><h3>No saved shopping items</h3><p>Add regular items here for quick reselection.</p></div>'
+      }
+    </section>
+    <aside class="shopping-panel">
+      <div class="panel-header"><div><div class="eyebrow">CURRENT LIST</div><h2>Shopping list</h2></div></div>
+      <p class="panel-intro">Ingredients and selected regular items for your week.</p>
+      ${renderShoppingList()}
+      ${selectedManualShoppingIds.length ? renderManualShoppingItems() : ''}
+    </aside>
+  </div>
+`
+
 const render = () => {
   const totalServings = plannedRecipes.reduce((total, item) => total + item.servings, 0)
   app.innerHTML = `
@@ -359,6 +419,7 @@ const render = () => {
       <nav>
         <button class="${activeView === 'plan' ? 'active' : ''}" data-view="plan">Weekly plan</button>
         <button class="${activeView === 'recipes' ? 'active' : ''}" data-view="recipes">My recipes</button>
+        <button class="${activeView === 'shopping' ? 'active' : ''}" data-view="shopping">Shopping items</button>
       </nav>
       <div class="topbar-actions"><div class="account-menu"><button type="button" class="avatar" data-account-menu aria-haspopup="menu" aria-expanded="${isAccountMenuOpen}">TM</button><div class="account-dropdown ${isAccountMenuOpen ? 'is-open' : ''}" role="menu"><div class="account-label">ACCOUNT</div><button type="button" class="dropdown-action" data-export-recipes>Export backup</button><label class="dropdown-action">Import backup<input id="recipe-backup" type="file" accept=".json,application/json"></label></div></div></div>
     </header>
@@ -378,7 +439,9 @@ const render = () => {
               return `<section class="section-header"><div><div class="eyebrow">YOUR COLLECTION</div><h2>Recipes to cook</h2></div><div class="recipe-actions"><input class="recipe-search" id="recipe-search" type="search" value="${escapeHtml(recipeSearchTerm)}" placeholder="Search recipes"><button class="outline-button" data-new-recipe>＋ New recipe</button></div></section>
              ${filteredRecipes.length ? `<section class="recipe-grid">${filteredRecipes.map(renderRecipeCard).join('')}</section>` : '<div class="empty-state recipe-no-results"><span class="empty-icon">⌕</span><h3>No recipes found</h3><p>Try a different name, ingredient, tag, or category.</p></div>'}`
             })()
-          : `<div class="content-grid">
+          : activeView === 'shopping'
+            ? renderShoppingItemsView()
+            : `<div class="content-grid">
               <section>
                 <div class="section-header"><div><div class="eyebrow">YOUR WEEK</div><h2>Chosen meals</h2></div><button class="text-button" data-view="recipes">Add recipes →</button></div>
                 ${
@@ -396,6 +459,7 @@ const render = () => {
                   .join('')}</ul></div>
                 <p class="panel-intro">Ingredients combined from your weekly plan.</p>
                 ${renderShoppingList()}
+                ${selectedManualShoppingIds.length ? renderManualShoppingItems() : ''}
               </aside>
             </div>`
       }
@@ -410,7 +474,7 @@ const render = () => {
 const bindEvents = () => {
   document.querySelectorAll<HTMLElement>('[data-view]').forEach((button) => {
     button.addEventListener('click', () => {
-      activeView = button.dataset.view as 'plan' | 'recipes'
+      activeView = button.dataset.view as 'plan' | 'recipes' | 'shopping'
       render()
     })
   })
@@ -448,6 +512,30 @@ const bindEvents = () => {
   document.querySelector<HTMLInputElement>('#recipe-backup')?.addEventListener('change', (event) => {
     const file = (event.target as HTMLInputElement).files?.[0]
     if (file) void importRecipeBackup(file)
+  })
+  document.querySelector<HTMLFormElement>('#manual-shopping-form')?.addEventListener('submit', (event) => {
+    event.preventDefault()
+    const form = event.currentTarget as HTMLFormElement
+    const input = form.elements.namedItem('item') as HTMLInputElement
+    const name = input.value.trim()
+    if (!name) return
+    const existing = manualShoppingItems.find((item) => item.name.toLowerCase() === name.toLowerCase())
+    const item = existing ?? { id: crypto.randomUUID(), name }
+    manualShoppingItems = existing ? manualShoppingItems : [...manualShoppingItems, item]
+    if (!selectedManualShoppingIds.includes(item.id)) selectedManualShoppingIds = [...selectedManualShoppingIds, item.id]
+    saveManualShoppingItems()
+    saveManualShoppingSelection()
+    render()
+  })
+  document.querySelectorAll<HTMLInputElement>('[data-manual-shopping-toggle]').forEach((input) => {
+    input.addEventListener('change', () => {
+      const itemId = input.dataset.manualShoppingToggle!
+      selectedManualShoppingIds = input.checked
+        ? [...selectedManualShoppingIds, itemId]
+        : selectedManualShoppingIds.filter((id) => id !== itemId)
+      saveManualShoppingSelection()
+      render()
+    })
   })
   document.querySelector<HTMLButtonElement>('[data-account-menu]')?.addEventListener('click', () => {
     isAccountMenuOpen = !isAccountMenuOpen

@@ -215,3 +215,17 @@ Added a print-only brief list of the selected meals above the concise shopping l
 ## 17:06 UTC
 
 Removed the “STEP 2” and “Shopping list” heading from printed output while retaining the heading in the normal app view.
+
+# 2026-11-18
+
+## 10:49 UTC
+
+Added a persisted One-off items section to the shopping list. Users can add items such as milk, bread, and ready meals, remove them individually, and include them in the concise print layout.
+
+## 10:55 UTC
+
+Replaced the embedded one-off shopping section with a dedicated Shopping items tab. Manually added items are now retained in a reusable catalog, can be selected or unselected for the current list, and remain available for reselection later.
+
+## 10:57 UTC
+
+Added the current shopping list alongside the reusable-items manager on the Shopping items tab.
