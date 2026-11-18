@@ -285,3 +285,7 @@ Added a subtle green gradient, border, and rounded container to the home-page he
 ## 16:52 UTC
 
 Added Monday-based previous/next week navigation and per-household weekly plan persistence. Weekly recipe selections and serving counts now load from and save to the new Supabase `weekly_plans` table, with local storage retained as an offline fallback. Updated the README. Validation: `npm run build`, `npm run build:github-pages`, and `git diff --check`.
+
+## 16:54 UTC
+
+Added a clearly labelled “Next week's menu” button to the weekly plan hero while retaining the arrow navigation. Validation: `npm run build`, `npm run build:github-pages`, and `git diff --check`.

@@ -673,7 +673,7 @@ const render = () => {
           <h1>Give a man a fish and he'll eat for a day.<br><i>Teach him how to fish and he'll eat for life.</i></h1>
           <p>Choose your meals for the week and we’ll take care of the shopping list.</p>
         </div>
-        <div class="week-summary"><span class="summary-label">${selectedWeekStart === currentWeekStart ? 'THIS WEEK' : 'PLANNED WEEK'}</span><strong>${plannedRecipes.length} <small>meals</small></strong><span>${totalServings} servings planned</span></div>
+        <div class="week-summary"><span class="summary-label">${selectedWeekStart === currentWeekStart ? 'THIS WEEK' : 'PLANNED WEEK'}</span><strong>${plannedRecipes.length} <small>meals</small></strong><span>${totalServings} servings planned</span><button type="button" class="outline-button next-week-button" data-week-next>Next week's menu →</button></div>
       </section>
       ${
         activeView === 'recipes'
@@ -715,7 +715,9 @@ const render = () => {
 
 const bindEvents = () => {
   document.querySelector<HTMLButtonElement>('[data-week-previous]')?.addEventListener('click', () => void changeSelectedWeek(-1))
-  document.querySelector<HTMLButtonElement>('[data-week-next]')?.addEventListener('click', () => void changeSelectedWeek(1))
+  document.querySelectorAll<HTMLButtonElement>('[data-week-next]').forEach((button) => {
+    button.addEventListener('click', () => void changeSelectedWeek(1))
+  })
   document.querySelectorAll<HTMLElement>('[data-view]').forEach((button) => {
     button.addEventListener('click', () => {
       activeView = button.dataset.view as 'plan' | 'recipes' | 'shopping'
