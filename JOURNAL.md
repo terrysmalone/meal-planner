@@ -300,7 +300,11 @@ Changed the default planning week to the week after the current Monday-starting 
 
 ## 17:06 UTC
 
-Made reusable shopping-item selections week-specific. Each weekly plan now stores its selected shopping item IDs alongside recipe selections, with local storage and Supabase persistence and compatibility for older recipe-only plan records. Updated the README. Validation pending.
+Made reusable shopping-item selections week-specific. Each weekly plan now stores its selected shopping item IDs alongside recipe selections, with local storage and Supabase persistence and compatibility for older recipe-only plan records. Updated the README. Validation: `npm run build`, `npm run build:github-pages`, and `git diff --check`.
+
+## 17:10 UTC
+
+Hardened sign-in initialization against malformed or legacy array-shaped local and Supabase data, including weekly plans, shopping selections, and household relationship results. Validation: `npm run build`, `npm run build:github-pages`, and `git diff --check`.
 
 ## 17:02 UTC
 

@@ -48,7 +48,9 @@ export const listHouseholds = async (user: User) => {
     .select('household:households(id, name, invite_code)')
     .eq('user_id', user.id)
   if (error) throw error
-  return (data ?? []).map((row) => row.household as unknown as Household)
+  return (data ?? [])
+    .map((row) => (Array.isArray(row.household) ? row.household[0] : row.household) as unknown as Household)
+    .filter((household): household is Household => Boolean(household?.id))
 }
 
 export const subscribeToAuthChanges = (callback: (session: Session | null) => void) =>

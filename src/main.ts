@@ -83,12 +83,21 @@ const legacyManualShoppingItems: ManualShoppingItem[] = savedManualShoppingItems
     }))
   : []
 let recipes: Recipe[] = []
-let plannedRecipes: PlannedRecipe[] = savedPlan ? JSON.parse(savedPlan) : []
+const parseArray = <T>(value: string | null): T[] => {
+  if (!value) return []
+  try {
+    const parsed: unknown = JSON.parse(value)
+    return Array.isArray(parsed) ? parsed as T[] : []
+  } catch {
+    console.warn('Ignoring invalid local array data.')
+    return []
+  }
+}
+
+let plannedRecipes: PlannedRecipe[] = parseArray<PlannedRecipe>(savedPlan)
 let manualShoppingItems: ManualShoppingItem[] = []
-let manualShoppingSections: string[] = savedManualShoppingSections ? JSON.parse(savedManualShoppingSections) : []
-let selectedManualShoppingIds: string[] = savedManualShoppingSelection
-  ? JSON.parse(savedManualShoppingSelection)
-  : manualShoppingItems.map((item) => item.id)
+let manualShoppingSections: string[] = parseArray<string>(savedManualShoppingSections)
+let selectedManualShoppingIds: string[] = parseArray<string>(savedManualShoppingSelection)
 let activeView: 'plan' | 'recipes' | 'shopping' = 'plan'
 let isRecipeFormOpen = false
 let viewingRecipeId: string | null = null
@@ -270,14 +279,16 @@ const selectedWeekLabel = () => {
 const loadSelectedWeekPlan = async () => {
   const savedLocalPlan = localStorage.getItem(weekStorageKey(selectedWeekStart))
     ?? (selectedWeekStart === defaultWeekStart ? localStorage.getItem(storageKey) : null)
-  const localPlan: PlannedRecipe[] = savedLocalPlan ? JSON.parse(savedLocalPlan) : []
+  const localPlan = parseArray<PlannedRecipe>(savedLocalPlan)
   const savedLocalSelection = localStorage.getItem(weekShoppingSelectionStorageKey(selectedWeekStart))
     ?? (selectedWeekStart === defaultWeekStart ? localStorage.getItem(manualShoppingSelectionStorageKey) : null)
-  const localSelection: string[] = savedLocalSelection ? JSON.parse(savedLocalSelection) : []
+  const localSelection = parseArray<string>(savedLocalSelection)
   const remotePlan = await loadWeeklyPlan(selectedWeekStart)
   loadedWeeklyPlanFromRemote = remotePlan !== null
-  plannedRecipes = remotePlan?.recipes ?? localPlan
-  if (remotePlan) selectedManualShoppingIds = remotePlan.selectedShoppingItemIds
+  plannedRecipes = remotePlan && Array.isArray(remotePlan.recipes) ? remotePlan.recipes : localPlan
+  if (remotePlan) {
+    selectedManualShoppingIds = Array.isArray(remotePlan.selectedShoppingItemIds) ? remotePlan.selectedShoppingItemIds : []
+  }
   else selectedManualShoppingIds = localSelection
   localStorage.setItem(weekStorageKey(selectedWeekStart), JSON.stringify(plannedRecipes))
   if (selectedWeekStart === defaultWeekStart) localStorage.setItem(storageKey, JSON.stringify(plannedRecipes))
