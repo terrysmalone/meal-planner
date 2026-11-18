@@ -334,6 +334,10 @@ Improved responsive styling for desktop, tablet, and mobile layouts without chan
 
 Added per-week bought-state persistence for generated and reusable shopping-list items. Checked items are stored in the weekly plan JSON, synchronized through Supabase, restored across devices, and retained in backups. Older weekly plans default to no bought items. Validation: `npm run build`, `npm run build:github-pages`, and `git diff --check`.
 
+## 17:33 UTC
+
+Serialized weekly-plan writes and awaited bought-item checkbox saves to prevent overlapping Supabase upserts from arriving out of order and losing the latest checked state. Validation: `npm run build`, `npm run build:github-pages`, and `git diff --check`.
+
 ## 17:02 UTC
 
 Updated `.github/copilot-instructions.md` to require local verification before any commit or push and to prohibit automatic commits or pushes unless explicitly requested. These changes remain uncommitted and unpushed.

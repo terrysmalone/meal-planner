@@ -116,6 +116,7 @@ let currentHousehold: Household | null = null
 let loadedWeeklyPlanFromRemote = false
 let authMode: 'sign-in' | 'sign-up' = 'sign-in'
 let authError = ''
+let planSaveQueue = Promise.resolve()
 
 const app = document.querySelector<HTMLDivElement>('#app')!
 
@@ -123,7 +124,10 @@ const savePlan = async () => {
   localStorage.setItem(weekStorageKey(selectedWeekStart), JSON.stringify(plannedRecipes))
   localStorage.setItem(selectedWeekStorageKey, selectedWeekStart)
   if (selectedWeekStart === defaultWeekStart) localStorage.setItem(storageKey, JSON.stringify(plannedRecipes))
-  await saveWeeklyPlan(selectedWeekStart, { recipes: plannedRecipes, selectedShoppingItemIds: selectedManualShoppingIds, boughtShoppingItemIds })
+  const weekStart = selectedWeekStart
+  const plan = { recipes: plannedRecipes, selectedShoppingItemIds: selectedManualShoppingIds, boughtShoppingItemIds }
+  planSaveQueue = planSaveQueue.then(() => saveWeeklyPlan(weekStart, plan))
+  await planSaveQueue
 }
 const saveManualShoppingSelection = () => {
   const serializedSelection = JSON.stringify(selectedManualShoppingIds)
@@ -131,11 +135,11 @@ const saveManualShoppingSelection = () => {
   localStorage.setItem(weekShoppingSelectionStorageKey(selectedWeekStart), serializedSelection)
   void savePlan()
 }
-const saveBoughtShoppingItems = () => {
+const saveBoughtShoppingItems = async () => {
   const serializedBoughtItems = JSON.stringify(boughtShoppingItemIds)
   localStorage.setItem(boughtShoppingStorageKey, serializedBoughtItems)
   localStorage.setItem(weekBoughtShoppingStorageKey(selectedWeekStart), serializedBoughtItems)
-  void savePlan()
+  await savePlan()
 }
 const mirrorShoppingItems = () => localStorage.setItem(legacyManualShoppingStorageKey, JSON.stringify(manualShoppingItems))
 const mirrorShoppingSections = () => localStorage.setItem(legacyManualShoppingSectionsStorageKey, JSON.stringify(manualShoppingSections))
@@ -953,12 +957,12 @@ const bindEvents = () => {
     })
   })
   document.querySelectorAll<HTMLInputElement>('[data-bought-shopping-item]').forEach((input) => {
-    input.addEventListener('change', () => {
+    input.addEventListener('change', async () => {
       const itemId = input.dataset.boughtShoppingItem!
       boughtShoppingItemIds = input.checked
         ? [...new Set([...boughtShoppingItemIds, itemId])]
         : boughtShoppingItemIds.filter((id) => id !== itemId)
-      saveBoughtShoppingItems()
+      await saveBoughtShoppingItems()
       render()
     })
   })
