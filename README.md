@@ -27,7 +27,7 @@ Run `supabase/schema.sql` in the Supabase SQL Editor to create the authenticated
 
 Copy `.env.example` to `.env.local` and add the Supabase project URL and publishable/anon key before running the app. Never commit `.env.local`, database passwords, or secret/service-role keys.
 
-The GitHub Pages workflow deploys `main` and this setup branch at `https://terrysmalone.github.io/meal-planner/`. In the repository settings, enable **Pages → Source: GitHub Actions**, then add repository variables named `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. Add the Pages URL to Supabase **Authentication → URL Configuration** as the site URL and an allowed redirect URL.
+The GitHub Pages workflow deploys `master` and this setup branch at `https://terrysmalone.github.io/meal-planner/`. In the repository settings, enable **Pages → Source: GitHub Actions**, then add repository variables named `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`. Add the Pages URL to Supabase **Authentication → URL Configuration** as the site URL and an allowed redirect URL.
 
 ## Current foundation
 

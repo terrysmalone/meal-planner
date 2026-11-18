@@ -3,7 +3,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main
+      - master
       - setup-github-pages-supabase
   workflow_dispatch:
 
