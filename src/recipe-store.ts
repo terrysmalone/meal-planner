@@ -17,9 +17,19 @@ export type Recipe = {
   ingredients: Ingredient[]
 }
 
+export type ManualShoppingItem = {
+  id: string
+  name: string
+  section: string
+  quantity?: number
+  unit?: string
+}
+
 const databaseName = 'operation-fish-for-life'
-const databaseVersion = 15
+const databaseVersion = 16
 const recipeStoreName = 'recipes'
+const shoppingItemStoreName = 'shoppingItems'
+const shoppingSectionStoreName = 'shoppingSections'
 
 const chickenFajitaTrayBake: Recipe = {
   id: 'loaded-chicken-fajita-tray-bake',
@@ -316,6 +326,10 @@ const openDatabase = () => {
     request.onupgradeneeded = (event) => {
       const database = request.result
       if (event.oldVersion < 1) database.createObjectStore(recipeStoreName, { keyPath: 'id' })
+      if (event.oldVersion < 16) {
+        database.createObjectStore(shoppingItemStoreName, { keyPath: 'id' })
+        database.createObjectStore(shoppingSectionStoreName, { keyPath: 'name' })
+      }
       if (event.oldVersion < 2) request.transaction?.objectStore(recipeStoreName).put(chickenFajitaTrayBake)
       if (event.oldVersion < 3) request.transaction?.objectStore(recipeStoreName).put(chorizoSpaghetti)
       if (event.oldVersion < 4) {
@@ -406,6 +420,73 @@ export const replaceRecipes = async (recipes: Recipe[]) => {
   recipes.forEach((recipe) => store.put(recipe))
   await new Promise<void>((resolve, reject) => {
     transaction.onerror = () => reject(transaction.error ?? new Error('Unable to import the recipes.'))
+    transaction.oncomplete = () => resolve()
+  })
+}
+
+export const listShoppingItems = async () => {
+  const database = await openDatabase()
+  const transaction = database.transaction(shoppingItemStoreName, 'readonly')
+  return requestResult(transaction.objectStore(shoppingItemStoreName).getAll()) as Promise<ManualShoppingItem[]>
+}
+
+export const saveShoppingItem = async (item: ManualShoppingItem) => {
+  const database = await openDatabase()
+  const transaction = database.transaction(shoppingItemStoreName, 'readwrite')
+  transaction.objectStore(shoppingItemStoreName).put(item)
+  await new Promise<void>((resolve, reject) => {
+    transaction.onerror = () => reject(transaction.error ?? new Error('Unable to save the shopping item.'))
+    transaction.oncomplete = () => resolve()
+  })
+}
+
+export const deleteShoppingItem = async (id: string) => {
+  const database = await openDatabase()
+  const transaction = database.transaction(shoppingItemStoreName, 'readwrite')
+  transaction.objectStore(shoppingItemStoreName).delete(id)
+  await new Promise<void>((resolve, reject) => {
+    transaction.onerror = () => reject(transaction.error ?? new Error('Unable to delete the shopping item.'))
+    transaction.oncomplete = () => resolve()
+  })
+}
+
+export const replaceShoppingItems = async (items: ManualShoppingItem[]) => {
+  const database = await openDatabase()
+  const transaction = database.transaction(shoppingItemStoreName, 'readwrite')
+  const store = transaction.objectStore(shoppingItemStoreName)
+  store.clear()
+  items.forEach((item) => store.put(item))
+  await new Promise<void>((resolve, reject) => {
+    transaction.onerror = () => reject(transaction.error ?? new Error('Unable to import shopping items.'))
+    transaction.oncomplete = () => resolve()
+  })
+}
+
+export const listShoppingSections = async () => {
+  const database = await openDatabase()
+  const transaction = database.transaction(shoppingSectionStoreName, 'readonly')
+  const sections = await requestResult(transaction.objectStore(shoppingSectionStoreName).getAll()) as Array<{ name: string }>
+  return sections.map((section) => section.name)
+}
+
+export const saveShoppingSection = async (name: string) => {
+  const database = await openDatabase()
+  const transaction = database.transaction(shoppingSectionStoreName, 'readwrite')
+  transaction.objectStore(shoppingSectionStoreName).put({ name })
+  await new Promise<void>((resolve, reject) => {
+    transaction.onerror = () => reject(transaction.error ?? new Error('Unable to save the shopping section.'))
+    transaction.oncomplete = () => resolve()
+  })
+}
+
+export const replaceShoppingSections = async (sections: string[]) => {
+  const database = await openDatabase()
+  const transaction = database.transaction(shoppingSectionStoreName, 'readwrite')
+  const store = transaction.objectStore(shoppingSectionStoreName)
+  store.clear()
+  sections.forEach((name) => store.put({ name }))
+  await new Promise<void>((resolve, reject) => {
+    transaction.onerror = () => reject(transaction.error ?? new Error('Unable to import shopping sections.'))
     transaction.oncomplete = () => resolve()
   })
 }

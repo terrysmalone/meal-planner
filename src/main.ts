@@ -1,18 +1,23 @@
 import './style.css'
-import { deleteRecipe, initializeRecipes, listRecipes, replaceRecipes, saveRecipe } from './recipe-store'
-import type { Category, Ingredient, Recipe } from './recipe-store'
+import {
+  deleteRecipe,
+  deleteShoppingItem,
+  initializeRecipes,
+  listRecipes,
+  listShoppingItems,
+  listShoppingSections,
+  replaceRecipes,
+  replaceShoppingItems,
+  replaceShoppingSections,
+  saveRecipe,
+  saveShoppingItem,
+  saveShoppingSection,
+} from './recipe-store'
+import type { Category, Ingredient, ManualShoppingItem, Recipe } from './recipe-store'
 
 type PlannedRecipe = {
   recipeId: string
   servings: number
-}
-
-type ManualShoppingItem = {
-  id: string
-  name: string
-  section: string
-  quantity?: number
-  unit?: string
 }
 
 type ShoppingListItem = {
@@ -38,17 +43,15 @@ type SaveFilePickerWindow = Window & {
 }
 
 const storageKey = 'meal-planner-plan'
-const manualShoppingStorageKey = 'meal-planner-shopping-items'
+const legacyManualShoppingStorageKey = 'meal-planner-shopping-items'
+const legacyManualShoppingSectionsStorageKey = 'meal-planner-shopping-sections'
 const manualShoppingSelectionStorageKey = 'meal-planner-selected-shopping-items'
-const manualShoppingSectionsStorageKey = 'meal-planner-shopping-sections'
 const defaultShoppingSections = ['Produce', 'Protein', 'Dairy', 'Pantry']
 const savedPlan = localStorage.getItem(storageKey)
-const savedManualShoppingItems = localStorage.getItem(manualShoppingStorageKey)
+const savedManualShoppingItems = localStorage.getItem(legacyManualShoppingStorageKey)
 const savedManualShoppingSelection = localStorage.getItem(manualShoppingSelectionStorageKey)
-const savedManualShoppingSections = localStorage.getItem(manualShoppingSectionsStorageKey)
-let recipes: Recipe[] = []
-let plannedRecipes: PlannedRecipe[] = savedPlan ? JSON.parse(savedPlan) : []
-let manualShoppingItems: ManualShoppingItem[] = savedManualShoppingItems
+const savedManualShoppingSections = localStorage.getItem(legacyManualShoppingSectionsStorageKey)
+const legacyManualShoppingItems: ManualShoppingItem[] = savedManualShoppingItems
   ? (JSON.parse(savedManualShoppingItems) as Array<Partial<ManualShoppingItem>>).map((item) => ({
       id: item.id ?? crypto.randomUUID(),
       name: item.name ?? '',
@@ -57,9 +60,10 @@ let manualShoppingItems: ManualShoppingItem[] = savedManualShoppingItems
       unit: item.unit ?? '',
     }))
   : []
-let manualShoppingSections: string[] = savedManualShoppingSections
-  ? JSON.parse(savedManualShoppingSections)
-  : []
+let recipes: Recipe[] = []
+let plannedRecipes: PlannedRecipe[] = savedPlan ? JSON.parse(savedPlan) : []
+let manualShoppingItems: ManualShoppingItem[] = []
+let manualShoppingSections: string[] = savedManualShoppingSections ? JSON.parse(savedManualShoppingSections) : []
 let selectedManualShoppingIds: string[] = savedManualShoppingSelection
   ? JSON.parse(savedManualShoppingSelection)
   : manualShoppingItems.map((item) => item.id)
@@ -73,14 +77,21 @@ let recipeSearchTerm = ''
 const app = document.querySelector<HTMLDivElement>('#app')!
 
 const savePlan = () => localStorage.setItem(storageKey, JSON.stringify(plannedRecipes))
-const saveManualShoppingItems = () => localStorage.setItem(manualShoppingStorageKey, JSON.stringify(manualShoppingItems))
-const saveManualShoppingSelection = () =>
-  localStorage.setItem(manualShoppingSelectionStorageKey, JSON.stringify(selectedManualShoppingIds))
-const saveManualShoppingSections = () =>
-  localStorage.setItem(manualShoppingSectionsStorageKey, JSON.stringify(manualShoppingSections))
+const saveManualShoppingSelection = () => localStorage.setItem(manualShoppingSelectionStorageKey, JSON.stringify(selectedManualShoppingIds))
+const mirrorShoppingItems = () => localStorage.setItem(legacyManualShoppingStorageKey, JSON.stringify(manualShoppingItems))
+const mirrorShoppingSections = () => localStorage.setItem(legacyManualShoppingSectionsStorageKey, JSON.stringify(manualShoppingSections))
 
 const exportRecipeBackup = async () => {
-  const contents = JSON.stringify(recipes, null, 2)
+  const contents = JSON.stringify(
+    {
+      recipes,
+      shoppingItems: manualShoppingItems,
+      shoppingSections: manualShoppingSections,
+      selectedShoppingItemIds: selectedManualShoppingIds,
+    },
+    null,
+    2,
+  )
   const pickerWindow = window as SaveFilePickerWindow
   if (pickerWindow.showSaveFilePicker) {
     try {
@@ -135,12 +146,65 @@ const isRecipeBackup = (value: unknown): value is Recipe[] => {
   })
 }
 
+const isManualShoppingItems = (value: unknown): value is ManualShoppingItem[] =>
+  Array.isArray(value) &&
+  value.every(
+    (item) =>
+      item &&
+      typeof item === 'object' &&
+      typeof (item as ManualShoppingItem).id === 'string' &&
+      typeof (item as ManualShoppingItem).name === 'string' &&
+      typeof (item as ManualShoppingItem).section === 'string' &&
+      ((item as ManualShoppingItem).quantity === undefined || typeof (item as ManualShoppingItem).quantity === 'number') &&
+      ((item as ManualShoppingItem).unit === undefined || typeof (item as ManualShoppingItem).unit === 'string'),
+  )
+
+type RecipeBackup = {
+  recipes: Recipe[]
+  shoppingItems: ManualShoppingItem[]
+  shoppingSections: string[]
+  selectedShoppingItemIds: string[]
+}
+
+const parseRecipeBackup = (value: unknown): RecipeBackup | null => {
+  if (isRecipeBackup(value)) {
+    return { recipes: value, shoppingItems: manualShoppingItems, shoppingSections: manualShoppingSections, selectedShoppingItemIds: selectedManualShoppingIds }
+  }
+  if (!value || typeof value !== 'object') return null
+  const backup = value as Partial<RecipeBackup>
+  if (
+    !isRecipeBackup(backup.recipes) ||
+    !isManualShoppingItems(backup.shoppingItems) ||
+    !Array.isArray(backup.shoppingSections) ||
+    !backup.shoppingSections.every((section) => typeof section === 'string') ||
+    !Array.isArray(backup.selectedShoppingItemIds) ||
+    !backup.selectedShoppingItemIds.every((id) => typeof id === 'string')
+  ) {
+    return null
+  }
+  return {
+    recipes: backup.recipes,
+    shoppingItems: backup.shoppingItems,
+    shoppingSections: backup.shoppingSections,
+    selectedShoppingItemIds: backup.selectedShoppingItemIds,
+  }
+}
+
 const importRecipeBackup = async (file: File) => {
   try {
     const data: unknown = JSON.parse(await file.text())
-    if (!isRecipeBackup(data)) throw new Error('This file is not a valid recipes.json backup.')
-    await replaceRecipes(data)
-    recipes = data
+    const backup = parseRecipeBackup(data)
+    if (!backup) throw new Error('This file is not a valid recipes.json backup.')
+    await replaceRecipes(backup.recipes)
+    await replaceShoppingItems(backup.shoppingItems)
+    await replaceShoppingSections(backup.shoppingSections)
+    recipes = backup.recipes
+    manualShoppingItems = backup.shoppingItems
+    manualShoppingSections = backup.shoppingSections
+    selectedManualShoppingIds = backup.selectedShoppingItemIds.filter((id) => manualShoppingItems.some((item) => item.id === id))
+    mirrorShoppingItems()
+    mirrorShoppingSections()
+    saveManualShoppingSelection()
     const recipeIds = new Set(recipes.map((recipe) => recipe.id))
     plannedRecipes = plannedRecipes.filter((item) => recipeIds.has(item.recipeId))
     savePlan()
@@ -541,7 +605,7 @@ const bindEvents = () => {
     const file = (event.target as HTMLInputElement).files?.[0]
     if (file) void importRecipeBackup(file)
   })
-  document.querySelector<HTMLFormElement>('#manual-shopping-form')?.addEventListener('submit', (event) => {
+  document.querySelector<HTMLFormElement>('#manual-shopping-form')?.addEventListener('submit', async (event) => {
     event.preventDefault()
     const form = event.currentTarget as HTMLFormElement
     const input = form.elements.namedItem('item') as HTMLInputElement
@@ -561,16 +625,22 @@ const bindEvents = () => {
       if (!section) return
       if (!shoppingSections().some((existingSection) => existingSection.toLowerCase() === section.toLowerCase())) {
         manualShoppingSections = [...manualShoppingSections, section]
-        saveManualShoppingSections()
+        await saveShoppingSection(section)
+        mirrorShoppingSections()
       } else {
         section = shoppingSections().find((existingSection) => existingSection.toLowerCase() === section.toLowerCase())!
       }
     }
     const existing = manualShoppingItems.find((item) => item.name.toLowerCase() === name.toLowerCase())
-    const item = existing ?? { id: crypto.randomUUID(), name, section, quantity, unit }
-    manualShoppingItems = existing ? manualShoppingItems : [...manualShoppingItems, item]
+    const item = existing
+      ? { ...existing, quantity: quantity ?? existing.quantity, unit: unit || existing.unit }
+      : { id: crypto.randomUUID(), name, section, quantity, unit }
+    manualShoppingItems = existing
+      ? manualShoppingItems.map((savedItem) => (savedItem.id === existing.id ? item : savedItem))
+      : [...manualShoppingItems, item]
     if (!selectedManualShoppingIds.includes(item.id)) selectedManualShoppingIds = [...selectedManualShoppingIds, item.id]
-    saveManualShoppingItems()
+    await saveShoppingItem(item)
+    mirrorShoppingItems()
     saveManualShoppingSelection()
     render()
   })
@@ -595,11 +665,12 @@ const bindEvents = () => {
     })
   })
   document.querySelectorAll<HTMLElement>('[data-delete-manual-shopping-item]').forEach((button) => {
-    button.addEventListener('click', () => {
+    button.addEventListener('click', async () => {
       const itemId = button.dataset.deleteManualShoppingItem!
       manualShoppingItems = manualShoppingItems.filter((item) => item.id !== itemId)
       selectedManualShoppingIds = selectedManualShoppingIds.filter((id) => id !== itemId)
-      saveManualShoppingItems()
+      await deleteShoppingItem(itemId)
+      mirrorShoppingItems()
       saveManualShoppingSelection()
       render()
     })
@@ -686,6 +757,22 @@ const bindEvents = () => {
 
 const startApp = async () => {
   recipes = await initializeRecipes()
+  const storedShoppingItems = await listShoppingItems()
+  if (!storedShoppingItems.length && legacyManualShoppingItems.length) {
+    await Promise.all(legacyManualShoppingItems.map((item) => saveShoppingItem(item)))
+  }
+  manualShoppingItems = await listShoppingItems()
+  const storedShoppingSections = await listShoppingSections()
+  if (!storedShoppingSections.length && manualShoppingSections.length) {
+    await Promise.all(manualShoppingSections.map((section) => saveShoppingSection(section)))
+  }
+  manualShoppingSections = await listShoppingSections()
+  if (!savedManualShoppingSelection && legacyManualShoppingItems.length) {
+    selectedManualShoppingIds = legacyManualShoppingItems.map((item) => item.id)
+    saveManualShoppingSelection()
+  }
+  mirrorShoppingItems()
+  mirrorShoppingSections()
   const recipeIds = new Set(recipes.map((recipe) => recipe.id))
   const validPlan = plannedRecipes.filter((item) => recipeIds.has(item.recipeId))
   if (validPlan.length !== plannedRecipes.length) {

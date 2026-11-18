@@ -241,3 +241,15 @@ Added permanent Delete controls for saved manual shopping items. Deleting an ite
 ## 11:03 UTC
 
 Extended manual shopping items with optional quantity and unit fields, while preserving existing saved items. Quantities and units now appear consistently in the reusable catalog, shopping list, and printout.
+
+## 14:49 UTC
+
+Updated manual shopping item creation so adding an existing item updates its quantity and unit instead of creating another item. For example, adding Milk with quantity 2 now changes the existing Milk entry to 2.
+
+## 14:52 UTC
+
+Moved reusable shopping items and custom shopping sections into IndexedDB alongside the recipe database, with a migration that preserves existing localStorage data.
+
+## 15:05 UTC
+
+Mirrored reusable shopping items and custom sections into localStorage as well as IndexedDB, and extended recipe backup import/export to include the shopping catalog, sections, and selected manual items.
