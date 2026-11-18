@@ -277,3 +277,7 @@ Made the repository public to enable free GitHub Pages hosting, configured the P
 ## 16:45 UTC
 
 Corrected the documented and configured release branch from `main` to the repository's actual default branch, `master`, and removed the obsolete `main` Pages policy. Validation: `npm run build`, `npm run build:github-pages`, and `git diff --check`.
+
+## 16:47 UTC
+
+Added a subtle green gradient, border, and rounded container to the home-page hero section as a visual deployment test on `master`. Validation: `npm run build`, `npm run build:github-pages`, and `git diff --check`.
