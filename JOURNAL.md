@@ -369,3 +369,7 @@ Grouped the Shopping items catalog by section (in shopping-list order) with item
 ## 16:46 UTC
 
 Added a search box to the Shopping items catalog that filters saved items by name (hiding empty sections) so duplicates are easy to spot before adding. Files changed: `src/main.ts`, `JOURNAL.md`. Validation: `npm run build`.
+
+## 17:22 UTC
+
+Fixed the Shopping items search: the `display: flex` rule on catalog rows overrode the `hidden` attribute, so non-matching items stayed visible. Added explicit `[hidden]` rules. Files changed: `src/style.css`, `JOURNAL.md`. Validation: `npm run build`.
