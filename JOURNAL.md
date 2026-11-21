@@ -365,3 +365,7 @@ Added a distraction-free "Shopping list" tab (first in the nav) showing only the
 ## 16:31 UTC
 
 Grouped the Shopping items catalog by section (in shopping-list order) with items sorted alphabetically within each section. Files changed: `src/main.ts`, `JOURNAL.md`. Validation: `npm run build`.
+
+## 16:46 UTC
+
+Added a search box to the Shopping items catalog that filters saved items by name (hiding empty sections) so duplicates are easy to spot before adding. Files changed: `src/main.ts`, `JOURNAL.md`. Validation: `npm run build`.
