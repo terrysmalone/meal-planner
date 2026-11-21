@@ -669,16 +669,26 @@ const renderShoppingItemsView = () => `
       </form>
       ${
         manualShoppingItems.length
-          ? `<ul class="shopping-items-catalog">${manualShoppingItems
+          ? shoppingSections()
+              .filter((section) => manualShoppingItems.some((item) => item.section === section))
               .map(
-                (item) => `
-                  <li>
-                    <label><input type="checkbox" data-manual-shopping-toggle="${escapeHtml(item.id)}" ${selectedManualShoppingIds.includes(item.id) ? 'checked' : ''}><span>${escapeHtml(item.name)}</span><small>${item.quantity === undefined ? '' : `${formatQuantity(item.quantity)} ${escapeHtml(item.unit ?? '')} · `}${escapeHtml(item.section)}</small></label>
-                    <button type="button" class="delete-button" data-delete-manual-shopping-item="${escapeHtml(item.id)}">Delete</button>
-                  </li>
+                (section) => `
+                  <h3 class="shopping-items-section">${escapeHtml(section)}</h3>
+                  <ul class="shopping-items-catalog">${manualShoppingItems
+                    .filter((item) => item.section === section)
+                    .sort((first, second) => first.name.localeCompare(second.name))
+                    .map(
+                      (item) => `
+                        <li>
+                          <label><input type="checkbox" data-manual-shopping-toggle="${escapeHtml(item.id)}" ${selectedManualShoppingIds.includes(item.id) ? 'checked' : ''}><span>${escapeHtml(item.name)}</span><small>${item.quantity === undefined ? '' : `${formatQuantity(item.quantity)} ${escapeHtml(item.unit ?? '')}`}</small></label>
+                          <button type="button" class="delete-button" data-delete-manual-shopping-item="${escapeHtml(item.id)}">Delete</button>
+                        </li>
+                      `,
+                    )
+                    .join('')}</ul>
                 `,
               )
-              .join('')}</ul>`
+              .join('')
           : '<div class="empty-state"><span class="empty-icon">✦</span><h3>No saved shopping items</h3><p>Add regular items here for quick reselection.</p></div>'
       }
     </section>
