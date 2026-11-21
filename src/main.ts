@@ -102,6 +102,7 @@ const parseArray = <T>(value: string | null): T[] => {
 
 let plannedRecipes: PlannedRecipe[] = parseArray<PlannedRecipe>(savedPlan)
 let manualShoppingItems: ManualShoppingItem[] = []
+let manualShoppingSearch = ''
 let manualShoppingSections: string[] = parseArray<string>(savedManualShoppingSections)
 let selectedManualShoppingIds: string[] = parseArray<string>(savedManualShoppingSelection)
 let boughtShoppingItemIds: string[] = parseArray<string>(savedBoughtShoppingItems)
@@ -669,23 +670,26 @@ const renderShoppingItemsView = () => `
       </form>
       ${
         manualShoppingItems.length
-          ? shoppingSections()
+          ? `<input type="search" id="manual-shopping-search" class="shopping-items-search" placeholder="Search saved items..." aria-label="Search saved shopping items" value="${escapeHtml(manualShoppingSearch)}"><p class="panel-intro" id="manual-shopping-no-match" hidden>No saved items match your search.</p>` +
+            shoppingSections()
               .filter((section) => manualShoppingItems.some((item) => item.section === section))
               .map(
                 (section) => `
+                  <div data-shopping-items-group>
                   <h3 class="shopping-items-section">${escapeHtml(section)}</h3>
                   <ul class="shopping-items-catalog">${manualShoppingItems
                     .filter((item) => item.section === section)
                     .sort((first, second) => first.name.localeCompare(second.name))
                     .map(
                       (item) => `
-                        <li>
+                        <li data-search-name="${escapeHtml(item.name.toLowerCase())}">
                           <label><input type="checkbox" data-manual-shopping-toggle="${escapeHtml(item.id)}" ${selectedManualShoppingIds.includes(item.id) ? 'checked' : ''}><span>${escapeHtml(item.name)}</span><small>${item.quantity === undefined ? '' : `${formatQuantity(item.quantity)} ${escapeHtml(item.unit ?? '')}`}</small></label>
                           <button type="button" class="delete-button" data-delete-manual-shopping-item="${escapeHtml(item.id)}">Delete</button>
                         </li>
                       `,
                     )
                     .join('')}</ul>
+                  </div>
                 `,
               )
               .join('')
@@ -952,6 +956,27 @@ const bindEvents = () => {
     mirrorShoppingItems()
     saveManualShoppingSelection()
     render()
+  })
+  const applyManualShoppingSearch = () => {
+    const query = manualShoppingSearch.trim().toLowerCase()
+    let visibleCount = 0
+    document.querySelectorAll<HTMLElement>('[data-shopping-items-group]').forEach((group) => {
+      let groupVisible = 0
+      group.querySelectorAll<HTMLElement>('li[data-search-name]').forEach((row) => {
+        const match = !query || row.dataset.searchName!.includes(query)
+        row.hidden = !match
+        if (match) groupVisible += 1
+      })
+      group.hidden = groupVisible === 0
+      visibleCount += groupVisible
+    })
+    const noMatch = document.querySelector<HTMLElement>('#manual-shopping-no-match')
+    if (noMatch) noMatch.hidden = visibleCount > 0
+  }
+  applyManualShoppingSearch()
+  document.querySelector<HTMLInputElement>('#manual-shopping-search')?.addEventListener('input', (event) => {
+    manualShoppingSearch = (event.currentTarget as HTMLInputElement).value
+    applyManualShoppingSearch()
   })
   document.querySelector<HTMLSelectElement>('#manual-shopping-section')?.addEventListener('change', (event) => {
     const select = event.currentTarget as HTMLSelectElement
