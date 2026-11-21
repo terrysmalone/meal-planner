@@ -359,3 +359,9 @@ Removed the fish proverb heading from the hero section to declutter the mobile l
 ## 17:58 UTC
 
 Added a distraction-free "Shopping list" tab (first in the nav) showing only the week label and the checkable list with larger text and tap targets, with the hero and conflict warnings hidden. Files changed: `src/main.ts`, `src/style.css`, `JOURNAL.md`. Validation: `npm run build`.
+
+# 2026-11-21
+
+## 16:31 UTC
+
+Grouped the Shopping items catalog by section (in shopping-list order) with items sorted alphabetically within each section. Files changed: `src/main.ts`, `JOURNAL.md`. Validation: `npm run build`.
