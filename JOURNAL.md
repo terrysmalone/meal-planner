@@ -373,3 +373,9 @@ Added a search box to the Shopping items catalog that filters saved items by nam
 ## 17:22 UTC
 
 Fixed the Shopping items search: the `display: flex` rule on catalog rows overrode the `hidden` attribute, so non-matching items stayed visible. Added explicit `[hidden]` rules. Files changed: `src/style.css`, `JOURNAL.md`. Validation: `npm run build`.
+
+# 2026-11-27
+
+## 16:12 UTC
+
+Added per-week quantities for reusable shopping items. Selected items default to quantity 1, can be increased with a numeric control, and now contribute their base quantity multiplied by the selected count to the shopping list. Preserved compatibility with existing local data, remote weekly plans, and backups. Files changed: `src/main.ts`, `src/recipe-store.ts`, `src/style.css`, `JOURNAL.md`. Validation: `npm run build`.

@@ -36,6 +36,7 @@ export type WeeklyPlan = {
   recipes: WeeklyPlanItem[]
   selectedShoppingItemIds: string[]
   boughtShoppingItemIds: string[]
+  shoppingItemQuantities: Record<string, number>
 }
 
 export type WeeklyPlanRecord = WeeklyPlan & {
@@ -741,13 +742,21 @@ export const loadWeeklyPlan = async (weekStart: string): Promise<WeeklyPlan | nu
 }
 
 const parseWeeklyPlanData = (value: unknown): WeeklyPlan => {
-  if (Array.isArray(value)) return { recipes: value as WeeklyPlanItem[], selectedShoppingItemIds: [], boughtShoppingItemIds: [] }
-  if (!value || typeof value !== 'object') return { recipes: [], selectedShoppingItemIds: [], boughtShoppingItemIds: [] }
+  if (Array.isArray(value)) return { recipes: value as WeeklyPlanItem[], selectedShoppingItemIds: [], boughtShoppingItemIds: [], shoppingItemQuantities: {} }
+  if (!value || typeof value !== 'object') return { recipes: [], selectedShoppingItemIds: [], boughtShoppingItemIds: [], shoppingItemQuantities: {} }
   const savedPlan = value as Partial<WeeklyPlan>
   return {
     recipes: Array.isArray(savedPlan.recipes) ? savedPlan.recipes : [],
     selectedShoppingItemIds: Array.isArray(savedPlan.selectedShoppingItemIds) ? savedPlan.selectedShoppingItemIds : [],
     boughtShoppingItemIds: Array.isArray(savedPlan.boughtShoppingItemIds) ? savedPlan.boughtShoppingItemIds : [],
+    shoppingItemQuantities:
+      savedPlan.shoppingItemQuantities && typeof savedPlan.shoppingItemQuantities === 'object'
+        ? Object.fromEntries(
+            Object.entries(savedPlan.shoppingItemQuantities).filter(
+              ([, quantity]) => typeof quantity === 'number' && Number.isInteger(quantity) && quantity > 0,
+            ),
+          )
+        : {},
   }
 }
 

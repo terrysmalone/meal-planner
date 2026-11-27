@@ -89,6 +89,7 @@ h2 { color: #2d4336; font-size: 26px; letter-spacing: -1px; margin-top: 8px; }
 .shopping-items-catalog li[hidden], [data-shopping-items-group][hidden] { display: none; }
 .shopping-items-catalog label { display: flex; align-items: center; gap: 9px; cursor: pointer; }
 .shopping-items-catalog input { width: 15px; height: 15px; accent-color: #88a980; }
+.shopping-items-catalog input[type="number"] { width: 48px; height: auto; padding: 4px 5px; border: 1px solid #dfe7dc; border-radius: 4px; color: #56645b; background: #fbfcfa; font: inherit; font-size: 11px; accent-color: auto; }
 .shopping-items-catalog small { margin-left: auto; color: #98a19b; font-size: 10px; }
 .shopping-items-catalog .delete-button { font-size: 10px; }
 .shopping-group { padding-top: 19px; }
