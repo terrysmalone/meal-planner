@@ -379,3 +379,11 @@ Fixed the Shopping items search: the `display: flex` rule on catalog rows overro
 ## 16:12 UTC
 
 Added per-week quantities for reusable shopping items. Selected items default to quantity 1, can be increased with a numeric control, and now contribute their base quantity multiplied by the selected count to the shopping list. Preserved compatibility with existing local data, remote weekly plans, and backups. Files changed: `src/main.ts`, `src/recipe-store.ts`, `src/style.css`, `JOURNAL.md`. Validation: `npm run build`.
+
+## 16:16 UTC
+
+Added Select all and Unselect all controls to the reusable Shopping items section. Selecting all initializes any unset item quantities to 1, while unselecting all clears the current selections and quantities. Files changed: `src/main.ts`, `src/style.css`, `JOURNAL.md`. Validation: `npm run build`.
+
+## 16:20 UTC
+
+Preserved reusable shopping-item quantities when items are unselected or all items are unselected. Quantity preferences now load globally across weeks, with weekly and remote values retained as compatibility fallbacks. Files changed: `src/main.ts`, `JOURNAL.md`. Validation: `npm run build`.

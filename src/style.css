@@ -84,6 +84,8 @@ h2 { color: #2d4336; font-size: 26px; letter-spacing: -1px; margin-top: 8px; }
 .shopping-items-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 360px); gap: 34px; align-items: start; }
 .shopping-items-manager .panel-intro { padding-bottom: 17px; border-bottom: 1px solid #edf0ea; }
 .shopping-items-manager .manual-shopping-form { margin-top: 17px; }
+.shopping-items-actions { display: flex; gap: 12px; margin: 18px 0 0; }
+.shopping-items-actions .text-button { padding: 0; font-size: 10px; }
 .shopping-items-catalog { list-style: none; margin: 18px 0 0; padding: 0; border-top: 1px solid #edf0ea; }
 .shopping-items-catalog li { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid #f1f3ef; color: #56645b; font-size: 12px; }
 .shopping-items-catalog li[hidden], [data-shopping-items-group][hidden] { display: none; }

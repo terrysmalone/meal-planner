@@ -436,7 +436,8 @@ const loadSelectedWeekPlan = async () => {
   const savedLocalSelection = localStorage.getItem(weekShoppingSelectionStorageKey(selectedWeekStart))
     ?? (selectedWeekStart === defaultWeekStart ? localStorage.getItem(manualShoppingSelectionStorageKey) : null)
   const localSelection = parseArray<string>(savedLocalSelection)
-  const localQuantities = parseShoppingItemQuantities(localStorage.getItem(`${weekShoppingSelectionStorageKey(selectedWeekStart)}-quantities`) ?? (selectedWeekStart === defaultWeekStart ? savedManualShoppingQuantities : null))
+  const localQuantities = parseShoppingItemQuantities(localStorage.getItem(`${manualShoppingSelectionStorageKey}-quantities`))
+  const weekQuantities = parseShoppingItemQuantities(localStorage.getItem(`${weekShoppingSelectionStorageKey(selectedWeekStart)}-quantities`))
   const savedLocalBoughtItems = localStorage.getItem(weekBoughtShoppingStorageKey(selectedWeekStart))
     ?? (selectedWeekStart === defaultWeekStart ? localStorage.getItem(boughtShoppingStorageKey) : null)
   const localBoughtItems = parseArray<string>(savedLocalBoughtItems)
@@ -446,12 +447,22 @@ const loadSelectedWeekPlan = async () => {
   if (remotePlan) {
     selectedManualShoppingIds = Array.isArray(remotePlan.selectedShoppingItemIds) ? remotePlan.selectedShoppingItemIds : []
     boughtShoppingItemIds = Array.isArray(remotePlan.boughtShoppingItemIds) ? remotePlan.boughtShoppingItemIds : []
-    selectedManualShoppingQuantities = remotePlan.shoppingItemQuantities ?? {}
+    if (!Object.keys(selectedManualShoppingQuantities).length) {
+      selectedManualShoppingQuantities = localQuantities
+    }
+    if (!Object.keys(selectedManualShoppingQuantities).length) {
+      selectedManualShoppingQuantities = weekQuantities
+    }
+    if (!Object.keys(selectedManualShoppingQuantities).length) {
+      selectedManualShoppingQuantities = remotePlan.shoppingItemQuantities ?? {}
+    }
   }
   else {
     selectedManualShoppingIds = localSelection
     boughtShoppingItemIds = localBoughtItems
-    selectedManualShoppingQuantities = localQuantities
+    selectedManualShoppingQuantities = Object.keys(selectedManualShoppingQuantities).length
+      ? selectedManualShoppingQuantities
+      : localQuantities
   }
   localStorage.setItem(weekStorageKey(selectedWeekStart), JSON.stringify(plannedRecipes))
   if (selectedWeekStart === defaultWeekStart) localStorage.setItem(storageKey, JSON.stringify(plannedRecipes))
@@ -744,7 +755,7 @@ const renderShoppingItemsView = () => `
       </form>
       ${
         manualShoppingItems.length
-          ? `<input type="search" id="manual-shopping-search" class="shopping-items-search" placeholder="Search saved items..." aria-label="Search saved shopping items" value="${escapeHtml(manualShoppingSearch)}"><p class="panel-intro" id="manual-shopping-no-match" hidden>No saved items match your search.</p>` +
+          ? `<div class="shopping-items-actions"><button type="button" class="text-button" data-select-all-shopping-items>Select all</button><button type="button" class="text-button" data-unselect-all-shopping-items>Unselect all</button></div><input type="search" id="manual-shopping-search" class="shopping-items-search" placeholder="Search saved items..." aria-label="Search saved shopping items" value="${escapeHtml(manualShoppingSearch)}"><p class="panel-intro" id="manual-shopping-no-match" hidden>No saved items match your search.</p>` +
             shoppingSections()
               .filter((section) => manualShoppingItems.some((item) => item.section === section))
               .map(
@@ -1060,6 +1071,19 @@ const bindEvents = () => {
     manualShoppingSearch = (event.currentTarget as HTMLInputElement).value
     applyManualShoppingSearch()
   })
+  document.querySelector<HTMLButtonElement>('[data-select-all-shopping-items]')?.addEventListener('click', () => {
+    selectedManualShoppingIds = manualShoppingItems.map((item) => item.id)
+    manualShoppingItems.forEach((item) => {
+      selectedManualShoppingQuantities[item.id] = selectedManualShoppingQuantities[item.id] ?? 1
+    })
+    saveManualShoppingSelection()
+    render()
+  })
+  document.querySelector<HTMLButtonElement>('[data-unselect-all-shopping-items]')?.addEventListener('click', () => {
+    selectedManualShoppingIds = []
+    saveManualShoppingSelection()
+    render()
+  })
   document.querySelector<HTMLSelectElement>('#manual-shopping-section')?.addEventListener('change', (event) => {
     const select = event.currentTarget as HTMLSelectElement
     const newSectionInput = document.querySelector<HTMLInputElement>('#manual-shopping-form input[name="new-section"]')
@@ -1077,7 +1101,6 @@ const bindEvents = () => {
         ? [...selectedManualShoppingIds, itemId]
         : selectedManualShoppingIds.filter((id) => id !== itemId)
       if (input.checked) selectedManualShoppingQuantities[itemId] = selectedManualShoppingQuantities[itemId] ?? 1
-      else delete selectedManualShoppingQuantities[itemId]
       saveManualShoppingSelection()
       render()
     })
