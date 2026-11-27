@@ -387,3 +387,15 @@ Added Select all and Unselect all controls to the reusable Shopping items sectio
 ## 16:20 UTC
 
 Preserved reusable shopping-item quantities when items are unselected or all items are unselected. Quantity preferences now load globally across weeks, with weekly and remote values retained as compatibility fallbacks. Files changed: `src/main.ts`, `JOURNAL.md`. Validation: `npm run build`.
+
+## 16:39 UTC
+
+Added the photographed recipe “Creamy Chicken & Cranberry Stew With Crushed Potatoes” to the starter recipe collection and `src/data/recipes.json`, using the visible x2 ingredient amounts. Files changed: `src/recipe-store.ts`, `src/data/recipes.json`, `JOURNAL.md`. Validation: recipe JSON parsing, `npm run build`, and `git diff --check`.
+
+## 16:41 UTC
+
+Scaled the new Creamy Chicken & Cranberry Stew recipe quantities by 50% to match the established default-portion convention, rounding carrots to 3. Files changed: `src/recipe-store.ts`, `src/data/recipes.json`, `JOURNAL.md`. Validation: recipe JSON parsing, `npm run build`, and `git diff --check`.
+
+## 16:43 UTC
+
+Updated recipe synchronization so starter recipes missing from an existing Supabase household are uploaded without overwriting recipes already stored remotely. Files changed: `src/recipe-store.ts`, `JOURNAL.md`. Validation: `npm run build` and `git diff --check`.

@@ -374,6 +374,26 @@ const smokyChickenMushroomSpaghetti: Recipe = {
   ],
 }
 
+const creamyChickenCranberryStew: Recipe = {
+  id: 'creamy-chicken-cranberry-stew',
+  name: 'Creamy Chicken & Cranberry Stew With Crushed Potatoes',
+  description: 'Creamy chicken and cranberry stew with spinach, carrots, soft cheese, and crushed potatoes.',
+  time: 20,
+  servings: 2,
+  tags: ['Gluten-free', '10-minute meal', '2 of your 5-a-day'],
+  ingredients: [
+    { name: 'Carrot', quantity: 3, unit: '', category: 'Produce' },
+    { name: 'Chicken stock mix (intense)', quantity: 8.25, unit: 'g', category: 'Pantry' },
+    { name: 'Diced chicken thigh', quantity: 375, unit: 'g', category: 'Protein' },
+    { name: 'Dried cranberries', quantity: 45, unit: 'g', category: 'Pantry' },
+    { name: 'Dried thyme', quantity: 0.75, unit: 'tsp', category: 'Pantry' },
+    { name: 'Roasted garlic paste', quantity: 22.5, unit: 'g', category: 'Pantry' },
+    { name: 'Soft cheese A7', quantity: 75, unit: 'g', category: 'Dairy' },
+    { name: 'Spinach', quantity: 120, unit: 'g', category: 'Produce' },
+    { name: 'Waxy potatoes', quantity: 525, unit: 'g', category: 'Produce' },
+  ],
+}
+
 export const starterRecipes: Recipe[] = [
   {
     id: 'peri-peri-halloumi-rice',
@@ -408,6 +428,7 @@ export const starterRecipes: Recipe[] = [
   cheesyBlackBeanEnchiladas,
   truffleCacioPepeRavioli,
   smokyChickenMushroomSpaghetti,
+  creamyChickenCranberryStew,
 ]
 
 let databasePromise: Promise<IDBDatabase> | undefined
@@ -525,8 +546,20 @@ export const listRecipes = async () => {
       )
       return localRecipes.sort((first, second) => first.name.localeCompare(second.name))
     }
-    await replaceLocalRecipes(remoteRecipes)
-    return remoteRecipes.sort((first, second) => first.name.localeCompare(second.name))
+    const remoteIds = new Set(remoteRecipes.map((recipe) => recipe.id))
+    const missingLocalRecipes = localRecipes.filter((recipe) => !remoteIds.has(recipe.id))
+    if (missingLocalRecipes.length) {
+      await syncRemote(
+        () =>
+          supabase.from('recipes').upsert(
+            missingLocalRecipes.map((recipe) => ({ household_id: activeHouseholdId, id: recipe.id, data: recipe })),
+          ),
+        'new starter recipe sync',
+      )
+    }
+    const mergedRecipes = [...remoteRecipes, ...missingLocalRecipes]
+    await replaceLocalRecipes(mergedRecipes)
+    return mergedRecipes.sort((first, second) => first.name.localeCompare(second.name))
   } catch (error) {
     reportRemoteFailure('recipe loading', error)
     return localRecipes.sort((first, second) => first.name.localeCompare(second.name))
